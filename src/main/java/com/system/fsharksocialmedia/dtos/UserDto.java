@@ -11,6 +11,7 @@ import java.time.LocalDate;
 public class UserDto implements Serializable {
     @Size(max = 200)
     String username;
+    UserroleDto roles;
     @Size(max = 30)
     String password;
     Boolean active;
