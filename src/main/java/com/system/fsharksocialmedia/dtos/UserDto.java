@@ -6,6 +6,7 @@ import lombok.Value;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class UserDto implements Serializable {
@@ -29,4 +30,5 @@ public class UserDto implements Serializable {
     String hometown;
     @Size(max = 100)
     String currency;
+    List<ImageDto> images;
 }

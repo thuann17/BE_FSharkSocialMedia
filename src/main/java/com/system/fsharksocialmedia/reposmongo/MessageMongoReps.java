@@ -8,5 +8,4 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface MessageMongoReps extends MongoRepository<MessageMongo, ObjectId> {
-    List<MessageMongo> findMessagesBySenderAndRecipient(String sender, String recipient);
-}
+    List<MessageMongo> findBySenderAndReciver(String sender, String Reciver);}

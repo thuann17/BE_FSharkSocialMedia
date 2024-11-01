@@ -1,9 +1,11 @@
 package com.system.fsharksocialmedia.services;
 
+import com.system.fsharksocialmedia.documents.MessageDto;
 import com.system.fsharksocialmedia.documents.MessageModel;
 import com.system.fsharksocialmedia.documents.MessageMongo;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.dtos.UserroleDto;
+import com.system.fsharksocialmedia.entities.Message;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.entities.Userrole;
 import com.system.fsharksocialmedia.repositories.UserRepository;
@@ -22,47 +24,44 @@ import java.util.stream.Collectors;
 @Service
 public class ChatService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     private MessageMongoReps messageMongoReps;
-    @Autowired
-    private UserroleRepository userroleRepository;
 
-    public void saveMessage(MessageModel message) {
+    //Lấy đoạn chat 2 user
+    public List<MessageDto> getMessagesBetweenUsers(String user1, String user2) {
+        List<MessageMongo> messages = messageMongoReps.findBySenderAndReciver(user1, user2); // Adjust this method to your repository
+        return messages.stream()
+                .map(this::converToDto)
+                .collect(Collectors.toList());
+    }
+
+    public MessageDto saveMessage(MessageModel message) {
         try {
             MessageMongo messageMongo = new MessageMongo();
             messageMongo.setSender(message.getSender());
-            messageMongo.setRecipient(message.getRecipient());
+            messageMongo.setReciver(message.getRecipient());
             messageMongo.setContent(message.getContent());
             messageMongo.setTimestamp(Instant.now());
-            convertToModel(messageMongoReps.save(messageMongo));
+            MessageMongo saved = messageMongoReps.save(messageMongo);
             System.out.println("Gửi thành công");
             messagingTemplate.convertAndSend("/topic/public", message);
+            return converToDto(saved);
         } catch (Exception e) {
-            logger.error("Error saving message: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
-    public List<MessageModel> getMessages() {
-        List<MessageMongo> messages = messageMongoReps.findAll();
-        return messages.stream().map(this::convertToModel).collect(Collectors.toList());
+    public MessageDto converToDto(MessageMongo messageMongo) {
+        MessageDto messageDto = new MessageDto();
+        messageDto.setSender(messageMongo.getSender());
+        messageDto.setReciver(messageMongo.getReciver());
+        messageDto.setContent(messageMongo.getContent());
+        messageDto.setTimestamp(messageMongo.getTimestamp());
+        return messageDto;
     }
 
-    private MessageModel convertToModel(MessageMongo messageMongo) {
-        return MessageModel.builder()
-                .sender(messageMongo.getSender())
-                .recipient(messageMongo.getRecipient())
-                .content(messageMongo.getContent())
-                .time(messageMongo.getTimestamp())
-                .type(MessageModel.MessageType.CHAT)
-                .build();
-    }
-
-    public List<MessageMongo> getMessagesBetweenUsers(String user1, String user2) {
-        return messageMongoReps.findMessagesBySenderAndRecipient(user1, user2);
-    }
 }

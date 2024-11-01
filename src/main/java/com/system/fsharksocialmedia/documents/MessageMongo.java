@@ -14,7 +14,6 @@ public class MessageMongo {
     private ObjectId id;
     private String sender;
     private String reciver;
-    private String recipient;
     private String content;
     private Instant timestamp;
 }

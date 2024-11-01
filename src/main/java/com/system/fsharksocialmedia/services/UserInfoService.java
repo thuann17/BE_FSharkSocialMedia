@@ -1,7 +1,9 @@
 package com.system.fsharksocialmedia.services;
 
+import com.system.fsharksocialmedia.dtos.ImageDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.dtos.UserroleDto;
+import com.system.fsharksocialmedia.entities.Image;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.entities.Userrole;
 import com.system.fsharksocialmedia.models.LoginModel;
@@ -34,8 +36,18 @@ public class UserInfoService implements UserDetailsService {
     private UserroleRepository userroleRepository;
 
     public List<UserDto> getAll() {
-        List<User> users = userRepository.findAll();
-        return users.stream().map(this::convertToUserDto).collect(Collectors.toList());
+        return userRepository.findAll().stream()
+                .map(this::convertToUserDtoWithImages)
+                .collect(Collectors.toList());
+    }
+
+    private UserDto convertToUserDtoWithImages(User user) {
+        UserDto userDto = convertToUserDto(user);
+        List<ImageDto> imageDtos = user.getImages().stream()
+                .map(this::convertToImageDto)
+                .collect(Collectors.toList());
+        userDto.setImages(imageDtos);
+        return userDto;
     }
 
     @Override
@@ -87,13 +99,27 @@ public class UserInfoService implements UserDetailsService {
         userDto.setBirthday(user.getBirthday());
         if (user.getRoles() != null) {
             UserroleDto userroleDto = new UserroleDto();
-            userroleDto.setId(user.getRoles().getId()); // sửa ở đây
+            userroleDto.setId(user.getRoles().getId());
             userroleDto.setRole(user.getRoles().getRole());
             userDto.setRoles(userroleDto);
         }
-        if(user.get)
         return userDto;
     }
+
+    public ImageDto convertToImageDto(Image image) {
+        ImageDto imageDto = new ImageDto();
+        imageDto.setId(image.getId());
+        imageDto.setImage(image.getImage());
+        imageDto.setCreatedate(image.getCreatedate());
+        imageDto.setAvatarrurl(image.getAvatarrurl());
+        imageDto.setCoverurl(image.getCoverurl());
+        imageDto.setStatus(image.getStatus());
+        if (image.getUsername() != null) {
+            imageDto.setUsername(convertToUserDto(image.getUsername()));
+        }
+        return imageDto;
+    }
+
 
     private User convertToEntity(UserDto userDto) {
         User user = new User();
