@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -22,8 +24,8 @@ public class User {
     @JoinColumn(name = "ROLES")
     private Userrole roles;
 
-    @Size(max = 30)
-    @Column(name = "PASSWORD", length = 30)
+    @Size(max = 200)
+    @Column(name = "PASSWORD", length = 200)
     private String password;
 
     @Column(name = "ACTIVE")
@@ -63,5 +65,35 @@ public class User {
     @Nationalized
     @Column(name = "CURRENCY", length = 100)
     private String currency;
+
+    @OneToMany(mappedBy = "username")
+    private Set<Comment> comments = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Groupmember> groupmembers = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Image> images = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Likecmt> likecmts = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Likepost> likeposts = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "usersrc")
+    private Set<Message> messages = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Notification> notifications = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Post> posts = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Share> shares = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "userid")
+    private Set<Usertrip> usertrips = new LinkedHashSet<>();
 
 }

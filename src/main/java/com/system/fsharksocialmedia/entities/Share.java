@@ -14,6 +14,7 @@ import java.time.Instant;
 @Table(name = "SHARES")
 public class Share {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 

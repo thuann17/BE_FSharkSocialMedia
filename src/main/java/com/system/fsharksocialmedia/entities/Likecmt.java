@@ -10,6 +10,7 @@ import lombok.Setter;
 @Table(name = "LIKECMTS")
 public class Likecmt {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
