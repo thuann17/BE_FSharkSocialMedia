@@ -19,6 +19,7 @@ public class UserModel {
     String bio;
     String hometown;
     String currency;
-
+    String coverUrl;
+    String avatarUrl;
     String message;
 }

@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.controllers;
+package com.system.fsharksocialmedia.controllers.admin;
 
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.models.PostModel;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/api/content")
+@RequestMapping("/api/post")
 public class PostController {
     @Autowired
     private PostService postService;

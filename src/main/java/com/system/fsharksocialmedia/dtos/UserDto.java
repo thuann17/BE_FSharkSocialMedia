@@ -12,7 +12,7 @@ public class UserDto implements Serializable {
     @Size(max = 200)
     String username;
     UserroleDto roles;
-    @Size(max = 30)
+    @Size(max = 255)
     String password;
     Boolean active;
     @Size(max = 200)

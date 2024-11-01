@@ -18,3 +18,4 @@ public class PostDto implements Serializable {
     long commentCount;
     long likeCount;
 }
+

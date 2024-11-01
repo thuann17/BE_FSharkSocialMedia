@@ -91,6 +91,7 @@ public class UserInfoService implements UserDetailsService {
             userroleDto.setRole(user.getRoles().getRole());
             userDto.setRoles(userroleDto);
         }
+        if(user.get)
         return userDto;
     }
 

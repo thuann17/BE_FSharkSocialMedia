@@ -48,13 +48,12 @@ public class SecurityConfig {
             CorsConfiguration configuration = new CorsConfiguration();
             configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));// Thay đổi miền nếu cần
             configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+            configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*"));
             configuration.setAllowedHeaders(Arrays.asList("*"));
             configuration.setAllowCredentials(true);
             return configuration;
         })).authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/welcome", "/api/**", "/ws/**").permitAll()
-                .requestMatchers("/api/**").authenticated()
+                .requestMatchers("/api/**", "/ws/**", "/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .requestMatchers("/api/**").hasAuthority("ADMIN")
                 .anyRequest().permitAll()).sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authenticationProvider(authenticationProvider()).exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler)).addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class).build();

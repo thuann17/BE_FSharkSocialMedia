@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.controllers;
+package com.system.fsharksocialmedia.controllers.other;
 
 
 import com.system.fsharksocialmedia.dtos.UserDto;
@@ -32,11 +32,6 @@ public class LoginController {
     @Autowired
     private UserInfoService userInfoService;
 
-    @GetMapping("/welcome")
-    public String welcome() {
-        return "Welcome this endpoint is not secure";
-    }
-
     @PostMapping("/addNewUser")
     public ResponseEntity<UserDto> addNewUser(@RequestBody LoginModel model) {
         UserDto createdUser = userInfoService.addUser(model);
@@ -44,13 +39,13 @@ public class LoginController {
     }
 
     @GetMapping("/user/userProfile")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PreAuthorize("hasAuthority('User')")
     public String userProfile() {
         return "Welcome to User Profile";
     }
 
     @GetMapping("/admin/adminProfile")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('Admin')")
     public ResponseEntity<?> adminProfile() {
         Map<String, String> reponse = new HashMap<String, String>();
         reponse.put("message:", "Welcome to Admin Profile");
@@ -71,15 +66,14 @@ public class LoginController {
                 System.out.println("role: " + roleName);
                 return ResponseEntity.ok(response);
             } else {
-
-                response.put("message", "Authentication failed! Invalid credentials.");
+                response.put("message", "Đăng nhập thất bại. Sai thông tin tài khoản!");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
         } catch (BadCredentialsException e) {
-            response.put("message", "Invalid username or password.");
+            response.put("message", "Đăng nhập thất bại. Sai thông tin tài khoản!!!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (Exception e) {
-            response.put("message", "An error occurred during authentication.");
+            response.put("message", "Đã xảy ra lỗi trong quá trình xác thực!");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -88,5 +82,10 @@ public class LoginController {
     public ResponseEntity<List<UserDto>> getAll() {
         List<UserDto> users = userInfoService.getAll();
         return ResponseEntity.ok(users);
+    }
+
+    @PostMapping("/adduser")
+    public ResponseEntity<UserDto> add(@RequestBody LoginModel user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userInfoService.addUser(user));
     }
 }
