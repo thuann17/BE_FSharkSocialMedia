@@ -1,5 +1,7 @@
 package com.system.fsharksocialmedia.documents;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 import org.bson.types.ObjectId;
@@ -11,6 +13,7 @@ import java.time.Instant;
 @Data
 public class MessageMongo {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private ObjectId id;
     private String sender;
     private String reciver;

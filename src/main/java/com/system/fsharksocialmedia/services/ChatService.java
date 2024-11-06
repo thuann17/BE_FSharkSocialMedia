@@ -24,31 +24,28 @@ import java.util.stream.Collectors;
 @Service
 public class ChatService {
 
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
     @Autowired
     private MessageMongoReps messageMongoReps;
 
     //Lấy đoạn chat 2 user
     public List<MessageDto> getMessagesBetweenUsers(String user1, String user2) {
-        List<MessageMongo> messages = messageMongoReps.findBySenderAndReciver(user1, user2); // Adjust this method to your repository
+        List<MessageMongo> messages = messageMongoReps.findMessagesBetweenUsers(user1, user2);
         return messages.stream()
                 .map(this::converToDto)
                 .collect(Collectors.toList());
     }
 
     public MessageDto saveMessage(MessageModel message) {
+        System.out.println("Vao: "+message);
         try {
             MessageMongo messageMongo = new MessageMongo();
+            System.out.println("tạo mới nè");
             messageMongo.setSender(message.getSender());
-            messageMongo.setReciver(message.getRecipient());
+            messageMongo.setReciver(message.getReciver());
             messageMongo.setContent(message.getContent());
             messageMongo.setTimestamp(Instant.now());
             MessageMongo saved = messageMongoReps.save(messageMongo);
-            System.out.println("Gửi thành công");
-            messagingTemplate.convertAndSend("/topic/public", message);
+            System.out.println("Lưu tin nhắn thành công");
             return converToDto(saved);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -64,4 +61,12 @@ public class ChatService {
         return messageDto;
     }
 
+    public MessageMongo converToMongo(MessageDto messageDto) {
+        MessageMongo messageMongo = new MessageMongo();
+        messageMongo.setSender(messageDto.getSender());
+        messageMongo.setReciver(messageDto.getReciver());
+        messageMongo.setContent(messageDto.getContent());
+        messageMongo.setTimestamp(messageDto.getTimestamp());
+        return messageMongo;
+    }
 }

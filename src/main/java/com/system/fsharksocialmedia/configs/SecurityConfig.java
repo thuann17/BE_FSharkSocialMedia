@@ -53,7 +53,7 @@ public class SecurityConfig {
             configuration.setAllowCredentials(true);
             return configuration;
         })).authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/**", "/ws/**", "/**").permitAll()
+                .requestMatchers( "/ws/**", "/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .requestMatchers("/api/**").hasAuthority("ADMIN")
                 .anyRequest().permitAll()).sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authenticationProvider(authenticationProvider()).exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler)).addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class).build();

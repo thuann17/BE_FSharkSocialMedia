@@ -2,75 +2,61 @@ package com.system.fsharksocialmedia.controllers.user;
 
 import com.system.fsharksocialmedia.documents.MessageDto;
 import com.system.fsharksocialmedia.documents.MessageModel;
-import com.system.fsharksocialmedia.dtos.UserDto;
+import com.system.fsharksocialmedia.dtos.FriendDto;
 import com.system.fsharksocialmedia.services.ChatService;
-import com.system.fsharksocialmedia.services.UserInfoService;
+import com.system.fsharksocialmedia.services.FriendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/chat")
+@CrossOrigin("http://localhost:3000")
+@RequestMapping("/api/chat")
 public class ChatController {
     @Autowired
     private ChatService chatService;
     @Autowired
-    private UserInfoService userInfoService;
+    private FriendService friendService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     // Lấy danh sách bạn bè
-    @GetMapping("list")
-    public ResponseEntity<List<UserDto>> list() {
-        return ResponseEntity.ok(userInfoService.getAll());
+    @GetMapping("/list/{username}")
+    public List<FriendDto> getFriends(@PathVariable String username) {
+        return friendService.getFriendsByUserTarget(username);
     }
+
 
     // Lấy tin nhắn giữa hai người dùng
     @GetMapping("/messages")
-    public ResponseEntity<List<MessageDto>> getMessagesBetweenUsers(
-            @RequestParam String sender,
-            @RequestParam String recipient) {
-        List<MessageDto> messages = chatService.getMessagesBetweenUsers(sender, recipient);
+    public ResponseEntity<List<MessageDto>> getMessagesBetweenUsers(@RequestParam String user1, @RequestParam String user2) {
+        List<MessageDto> messages = chatService.getMessagesBetweenUsers(user1, user2);
+        System.out.println("Lấy tin nhắn của user1: " + user1 + ", user2: " + user2);
         return ResponseEntity.ok(messages);
     }
 
-    // Gửi tin nhắn cá nhân
-    @PostMapping("/sendPrivateMessage")
-    public ResponseEntity<MessageModel> sendPrivateMessage(@RequestBody MessageModel chatMessage) {
-        chatService.saveMessage(chatMessage);
-        System.out.println("Gửi thành công tin nhắn cá nhân: " + chatMessage);
-        return ResponseEntity.ok(chatMessage);
-    }
-
-    // Gửi tin nhắn nhóm
-    @PostMapping("/sendGroupMessage")
-    public ResponseEntity<MessageModel> sendGroupMessage(@RequestBody MessageModel chatMessage) {
-        chatService.saveMessage(chatMessage);
-        System.out.println("Gửi thành công tin nhắn nhóm: " + chatMessage);
-        return ResponseEntity.ok(chatMessage);
-    }
-
-    // Gửi tin nhắn qua WebSocket (cho tin nhắn cá nhân)
-    @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/public")
-    public MessageModel sendMessageWebSocket(@Payload MessageModel chatMessage) {
-        chatService.saveMessage(chatMessage);
-        System.out.println("Gọi sendMessage qua WebSocket với tin nhắn: " + chatMessage);
-        return chatMessage;
-    }
-
     // Gửi tin nhắn cá nhân qua WebSocket
-    @MessageMapping("/chat.privateMessage")
-    public void sendPrivateMessageWebSocket(@Payload MessageModel chatMessage) {
-        System.out.println("Gọi privateMessage qua WebSocket với tin nhắn: " + chatMessage);
-        chatService.saveMessage(chatMessage);
+    @MessageMapping("/chat/{reciver}")
+    @SendToUser("/queue/messages")
+    public void sendMessage(@Payload MessageModel chatMessage) {
+        try {
+            chatService.saveMessage(chatMessage);
+            String destination = "/queue/" + chatMessage.getReciver();
+            messagingTemplate.convertAndSend(destination, chatMessage);
+            System.out.println("gửi thành công");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    // Gửi tin nhắn nhóm qua WebSocket
+//    // Gửi tin nhắn nhóm qua WebSocket
     @MessageMapping("/chat.groupMessage")
     public void sendGroupMessageWebSocket(@Payload MessageModel chatMessage) {
         System.out.println("Gọi groupMessage qua WebSocket với tin nhắn: " + chatMessage);

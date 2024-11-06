@@ -10,7 +10,6 @@ import java.time.Instant;
 
 @Data
 public class MessageDto implements Serializable {
-    private ObjectId id;
     private String sender;
     private String reciver;
     private String content;

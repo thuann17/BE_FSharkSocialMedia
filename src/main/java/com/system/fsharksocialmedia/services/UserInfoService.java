@@ -39,6 +39,9 @@ public class UserInfoService implements UserDetailsService {
         return userRepository.findAll().stream()
                 .map(this::convertToUserDtoWithImages)
                 .collect(Collectors.toList());
+    }public UserDto getByUsername(String username) {
+        User u = userRepository.findByUsername(username).orElse(null);
+        return convertToUserDto(u);
     }
 
     private UserDto convertToUserDtoWithImages(User user) {
@@ -84,7 +87,7 @@ public class UserInfoService implements UserDetailsService {
         }
     }
 
-    private UserDto convertToUserDto(User user) {
+    public UserDto convertToUserDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setUsername(user.getUsername());
         userDto.setPassword(user.getPassword());
@@ -121,7 +124,7 @@ public class UserInfoService implements UserDetailsService {
     }
 
 
-    private User convertToEntity(UserDto userDto) {
+    public User convertToEntity(UserDto userDto) {
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setPassword(userDto.getPassword());

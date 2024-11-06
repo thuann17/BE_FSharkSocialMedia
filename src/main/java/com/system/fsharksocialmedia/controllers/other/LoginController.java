@@ -32,6 +32,11 @@ public class LoginController {
     @Autowired
     private UserInfoService userInfoService;
 
+    @GetMapping("/{username}")
+    public ResponseEntity<UserDto> loadByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userInfoService.getByUsername(username));
+    }
+
     @PostMapping("/addNewUser")
     public ResponseEntity<UserDto> addNewUser(@RequestBody LoginModel model) {
         UserDto createdUser = userInfoService.addUser(model);

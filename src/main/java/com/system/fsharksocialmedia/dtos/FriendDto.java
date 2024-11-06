@@ -13,4 +13,5 @@ public class FriendDto implements Serializable {
     UserDto userSrc;
     Instant createdate;
     Boolean status;
+    String friendName;
 }

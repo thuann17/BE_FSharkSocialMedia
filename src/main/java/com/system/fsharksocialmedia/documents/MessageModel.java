@@ -8,11 +8,10 @@ import java.time.Instant;
 
 @Data
 @Builder
-@Document(collection = "Messages")
+//@Document(collection = "Messages")
 public class MessageModel {
     MessageType type;
     String sender;
-    String recipient;
     String content;
     Instant time;
     String reciver;
