@@ -1,5 +1,7 @@
 package com.system.fsharksocialmedia.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -7,10 +9,13 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "USERS")
 public class User {
     @Id
@@ -20,10 +25,11 @@ public class User {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLES")
+    @JsonIgnore
     private Userrole roles;
 
-    @Size(max = 30)
-    @Column(name = "PASSWORD", length = 30)
+    @Size(max = 200)
+    @Column(name = "PASSWORD", length = 200)
     private String password;
 
     @Column(name = "ACTIVE")
@@ -63,5 +69,35 @@ public class User {
     @Nationalized
     @Column(name = "CURRENCY", length = 100)
     private String currency;
+
+    @OneToMany(mappedBy = "username")
+    private Set<Comment> comments = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Groupmember> groupmembers = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user") // Sửa tên thuộc tính ở đây
+    private Set<Image> images = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Likecmt> likecmts = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Likepost> likeposts = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "usersrc")
+    private Set<Message> messages = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Notification> notifications = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Post> posts = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "username")
+    private Set<Share> shares = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "userid")
+    private Set<Usertrip> usertrips = new LinkedHashSet<>();
 
 }

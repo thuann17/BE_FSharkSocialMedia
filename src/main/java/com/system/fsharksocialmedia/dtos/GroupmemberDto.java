@@ -9,7 +9,7 @@ import java.time.Instant;
 @Data
 public class GroupmemberDto implements Serializable {
     Integer id;
-    ConversationDto1 conversation;
+    ConversationDto conversation;
     UserDto username;
     Instant timejoin;
 }
