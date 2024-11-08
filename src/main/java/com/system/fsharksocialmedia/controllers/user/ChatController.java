@@ -29,8 +29,8 @@ public class ChatController {
 
     // Lấy danh sách bạn bè
     @GetMapping("/list/{username}")
-    public List<FriendDto> getFriends(@PathVariable String username) {
-        return friendService.getFriendsByUserTarget(username);
+    public ResponseEntity<List<FriendDto>> getFriends(@PathVariable String username) {
+        return ResponseEntity.ok(friendService.getFriendsByUserTarget(username));
     }
 
 
@@ -43,20 +43,21 @@ public class ChatController {
     }
 
     // Gửi tin nhắn cá nhân qua WebSocket
-    @MessageMapping("/chat/{reciver}")
-    @SendToUser("/queue/messages")
-    public void sendMessage(@Payload MessageModel chatMessage) {
+    @MessageMapping("/chat/{receiver}")
+    public void sendMessage(@Payload MessageModel chatMessage, @DestinationVariable String receiver) {
         try {
             chatService.saveMessage(chatMessage);
-            String destination = "/queue/" + chatMessage.getReciver();
+            String destination = "/user/" + chatMessage.getReciver() + "/queue/messages";
             messagingTemplate.convertAndSend(destination, chatMessage);
+
             System.out.println("gửi thành công");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-//    // Gửi tin nhắn nhóm qua WebSocket
+
+    //    // Gửi tin nhắn nhóm qua WebSocket
     @MessageMapping("/chat.groupMessage")
     public void sendGroupMessageWebSocket(@Payload MessageModel chatMessage) {
         System.out.println("Gọi groupMessage qua WebSocket với tin nhắn: " + chatMessage);
