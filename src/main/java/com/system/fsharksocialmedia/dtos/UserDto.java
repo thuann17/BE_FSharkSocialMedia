@@ -1,57 +1,34 @@
 package com.system.fsharksocialmedia.dtos;
 
-import com.system.fsharksocialmedia.entities.Likecmt;
-import com.system.fsharksocialmedia.entities.Likepost;
-import com.system.fsharksocialmedia.entities.User;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-
 public class UserDto implements Serializable {
-    private String username;
-
-    private UserroleDto roles;
-
-    private String email;
-
-    private String password;
-
-    private Boolean active;
-
-    private Boolean gender;
-
-    private String lastname;
-
-    private String firstname;
-
-    private LocalDate birthday;
-
-    private String bio;
-
-    private String hometown;
-
-    private String currency;
-
-    private Set<ImageDto> images; // Assuming you have a corresponding ImageDto
-    private Set<CommentDto> comments; // Assuming you have a corresponding CommentDto
-    private Set<GroupmemberDto> groupmembers; // Assuming you have a corresponding GroupmemberDto
-    private Set<NotificationDto> notifications; // Assuming you have a corresponding NotificationDto
-    private Set<PostDto> posts; // Assuming you have a corresponding PostDto
-    private Set<ShareDto> shares; // Assuming you have a corresponding ShareDto
-    private Set<MessageDto> messages; // Assuming you have a corresponding MessageDto
-    private Set<Likepost> likeposts; // Assuming you have a corresponding LikePostDto
-    private Set<Likecmt> likecmts; // Assuming you have a corresponding LikeCmtDto
-    private Set<UsertripDto> usertrips;
-
-    public UserDto(String username) {
-        this.username = username;
-    }
+    @Size(max = 200)
+    String username;
+    UserroleDto roles;
+    @Size(max = 255)
+    String password;
+    Boolean active;
+    @Size(max = 200)
+    String email;
+    Boolean gender;
+    @Size(max = 100)
+    String lastname;
+    @Size(max = 100)
+    String firstname;
+    LocalDate birthday;
+    @Size(max = 500)
+    String bio;
+    @Size(max = 200)
+    String hometown;
+    @Size(max = 100)
+    String currency;
+    List<ImageDto> images;
 }

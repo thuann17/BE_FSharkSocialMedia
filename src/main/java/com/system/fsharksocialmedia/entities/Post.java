@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,6 +17,7 @@ import java.time.Instant;
 @Table(name = "POSTS")
 public class Post {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
@@ -33,5 +36,20 @@ public class Post {
 
     @Column(name = "STATUS")
     private Boolean status;
+
+    @OneToMany(mappedBy = "post")
+    private Set<Comment> comments = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "post")
+    private Set<Likepost> likeposts = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "post")
+    private Set<Notification> notifications = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "postid")
+    private Set<Postimage> postimages = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "post")
+    private Set<Share> shares = new LinkedHashSet<>();
 
 }

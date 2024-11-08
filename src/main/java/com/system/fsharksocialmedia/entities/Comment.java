@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -14,6 +16,7 @@ import java.time.Instant;
 @Table(name = "COMMENTS")
 public class Comment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
@@ -36,5 +39,8 @@ public class Comment {
     @Lob
     @Column(name = "IMAGE")
     private String image;
+
+    @OneToMany(mappedBy = "comment")
+    private Set<Likecmt> likecmts = new LinkedHashSet<>();
 
 }

@@ -1,7 +1,5 @@
 package com.system.fsharksocialmedia.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -15,7 +13,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "USERS")
 public class User {
     @Id
@@ -25,7 +22,6 @@ public class User {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLES")
-    @JsonIgnore
     private Userrole roles;
 
     @Size(max = 200)
@@ -76,7 +72,7 @@ public class User {
     @OneToMany(mappedBy = "username")
     private Set<Groupmember> groupmembers = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user") // Sửa tên thuộc tính ở đây
+    @OneToMany(mappedBy = "username")
     private Set<Image> images = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "username")
@@ -92,7 +88,6 @@ public class User {
     private Set<Notification> notifications = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "username")
-    @JsonIgnore
     private Set<Post> posts = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "username")

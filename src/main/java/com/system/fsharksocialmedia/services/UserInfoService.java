@@ -10,21 +10,24 @@ import com.system.fsharksocialmedia.models.LoginModel;
 import com.system.fsharksocialmedia.repositories.UserRepository;
 import com.system.fsharksocialmedia.repositories.UserroleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserInfoService  {
+public class UserInfoService implements UserDetailsService {
 
     @Autowired
     private UserRepository repository;
 
-//    @Autowired
-//    private PasswordEncoder encoder;
+    @Autowired
+    private PasswordEncoder encoder;
 
     @Autowired
     private UserRepository userRepository;
@@ -42,26 +45,31 @@ public class UserInfoService  {
     }
 
     private UserDto convertToUserDtoWithImages(User user) {
-        UserDto userDto = convertToUserDto(user); // Convert to basic UserDto
-        if (user.getImages() != null) { // Check if the user has images
-            List<ImageDto> imageDtos = user.getImages().stream()
-                    .map(this::convertToImageDto) // Convert each Image to ImageDto
-                    .collect(Collectors.toList());
-            userDto.setImages((Set<ImageDto>) imageDtos); // Set the list of ImageDto in UserDto
-        }
-        return userDto; // Return the populated UserDto
+        UserDto userDto = convertToUserDto(user);
+        List<ImageDto> imageDtos = user.getImages().stream()
+                .map(this::convertToImageDto)
+                .collect(Collectors.toList());
+        userDto.setImages(imageDtos);
+        return userDto;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> userDetail = repository.findByUsername(username);
+        return userDetail.map(UserInfoDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 
     public UserDto addUser(LoginModel model) {
         User us = new User();
         us.setUsername(model.getUsername());
-        us.setPassword(model.getPassword());
+        us.setPassword(encoder.encode(model.getPassword()));
         us.setEmail(model.getEmail());
         us.setActive(Optional.ofNullable(model.getActive()).orElse(true));
-        us.setGender(Boolean.valueOf(model.getGender()));
+        us.setGender(model.getGender());
         us.setLastname(model.getLastname());
         us.setFirstname(model.getFirstname());
-        us.setBirthday(LocalDate.parse(model.getBirthday()));
+        us.setBirthday(model.getBirthday());
         us.setBio(model.getBio());
         us.setHometown(model.getHometown());
         us.setCurrency(model.getCurrency());
@@ -105,16 +113,13 @@ public class UserInfoService  {
         ImageDto imageDto = new ImageDto();
         imageDto.setId(image.getId());
         imageDto.setImage(image.getImage());
-        imageDto.setCreateDate(image.getCreateDate()); // Make sure this method matches the DTO
-        imageDto.setAvatarUrl(image.getAvatarUrl()); // Ensure the field name matches in DTO
-        imageDto.setCoverUrl(image.getCoverUrl()); // Ensure the field name matches in DTO
+        imageDto.setCreatedate(image.getCreatedate());
+        imageDto.setAvatarrurl(image.getAvatarrurl());
+        imageDto.setCoverurl(image.getCoverurl());
         imageDto.setStatus(image.getStatus());
-
-        // Check if the user is not null and set the username
-        if (image.getUser() != null) {
-            imageDto.setUsername(image.getUser().getUsername()); // Assuming there's a getUsername method in User
+        if (image.getUsername() != null) {
+            imageDto.setUsername(convertToUserDto(image.getUsername()));
         }
-
         return imageDto;
     }
 

@@ -1,13 +1,13 @@
 package com.system.fsharksocialmedia.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,6 +15,7 @@ import org.hibernate.annotations.Nationalized;
 @Table(name = "PLACES")
 public class Place {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
@@ -36,5 +37,11 @@ public class Place {
     @Nationalized
     @Column(name = "DESCRIPTION", length = 1000)
     private String description;
+
+    @OneToMany(mappedBy = "placeid")
+    private Set<Placeimage> placeimages = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "placeid")
+    private Set<Placetrip> placetrips = new LinkedHashSet<>();
 
 }

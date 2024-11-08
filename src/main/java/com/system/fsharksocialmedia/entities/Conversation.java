@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -29,5 +31,11 @@ public class Conversation {
     @Lob
     @Column(name = "AVATAR")
     private String avatar;
+
+    @OneToMany(mappedBy = "conversation")
+    private Set<Groupmember> groupmembers = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "conversation")
+    private Set<Message> messages = new LinkedHashSet<>();
 
 }
