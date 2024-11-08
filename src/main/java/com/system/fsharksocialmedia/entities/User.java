@@ -92,6 +92,7 @@ public class User {
     private Set<Notification> notifications = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "username")
+    @JsonIgnore
     private Set<Post> posts = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "username")

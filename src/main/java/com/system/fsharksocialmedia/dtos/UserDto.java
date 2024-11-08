@@ -2,27 +2,42 @@ package com.system.fsharksocialmedia.dtos;
 
 import com.system.fsharksocialmedia.entities.Likecmt;
 import com.system.fsharksocialmedia.entities.Likepost;
-import jakarta.validation.constraints.Size;
+import com.system.fsharksocialmedia.entities.User;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Value;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class UserDto implements Serializable {
     private String username;
+
     private UserroleDto roles;
+
     private String email;
+
     private String password;
+
     private Boolean active;
+
     private Boolean gender;
+
     private String lastname;
+
     private String firstname;
+
     private LocalDate birthday;
+
     private String bio;
+
     private String hometown;
+
     private String currency;
 
     private Set<ImageDto> images; // Assuming you have a corresponding ImageDto
@@ -35,4 +50,8 @@ public class UserDto implements Serializable {
     private Set<Likepost> likeposts; // Assuming you have a corresponding LikePostDto
     private Set<Likecmt> likecmts; // Assuming you have a corresponding LikeCmtDto
     private Set<UsertripDto> usertrips;
+
+    public UserDto(String username) {
+        this.username = username;
+    }
 }

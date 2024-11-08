@@ -61,7 +61,9 @@ public class FriendService {
             // Convert Timestamp to Instant
             friendDto.setCreatedate(((Timestamp) result[3]).toInstant());
             friendDto.setStatus((Boolean) result[4]); // status
-            friendDto.setFriendName((String) result[5]); // friend_name từ CASE trong thủ tục
+            friendDto.setFriendName((String) result[6]); // friend_name từ CASE trong thủ tục
+            friendDto.setFriendUserName((String) result[5]);
+
             return friendDto;
         }).collect(Collectors.toList());
 
@@ -84,7 +86,8 @@ public class FriendService {
             friendDto.setUserSrc(userService.toDto(userRepository.findByUsername((String) result[2]).orElse(null))); /// Convert to UserDto for target user
             friendDto.setCreatedate(((Timestamp) result[3]).toInstant());
             friendDto.setStatus((Boolean) result[4]);
-            friendDto.setFriendName((String) result[5]); // Friend name from the CASE clause
+            friendDto.setFriendName((String) result[6]); // Friend name from the CASE clause
+            friendDto.setFriendUserName((String) result[5]);
             return friendDto;
         }).collect(Collectors.toList());
     }

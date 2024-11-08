@@ -21,4 +21,6 @@ public class FriendDto implements Serializable {
 
     String friendName;
 
+    String friendUserName;
+
 }
