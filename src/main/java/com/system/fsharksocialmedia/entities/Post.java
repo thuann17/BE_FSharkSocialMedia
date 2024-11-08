@@ -1,5 +1,6 @@
 package com.system.fsharksocialmedia.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class Post {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonManagedReference
     @JoinColumn(name = "USERNAME")
     private User username;
 

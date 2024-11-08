@@ -1,18 +1,24 @@
 package com.system.fsharksocialmedia.dtos;
 
 import lombok.Data;
-import lombok.Value;
 
-import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
-public class ImageDto implements Serializable {
-    Integer id;
-    String image;
-    Instant createdate;
-    String avatarrurl;
-    String coverurl;
-    Boolean status;
-    UserDto username;
+public class ImageDto {
+
+    private Integer id;
+
+    private String image;
+
+    private LocalDateTime createDate;
+
+    private String avatarUrl;
+
+    private String coverUrl;
+
+    private Boolean status;
+
+    private String username; // Username instead of User object for simplicity
+
 }

@@ -1,10 +1,12 @@
 package com.system.fsharksocialmedia.entities;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,29 +15,25 @@ import java.time.Instant;
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "ID")
     private Integer id;
 
-    @Lob
-    @Column(name = "IMAGE")
+    @Column(name = "IMAGE", columnDefinition = "TEXT")
     private String image;
 
     @Column(name = "CREATEDATE")
-    private Instant createdate;
+    private LocalDateTime createDate;
 
-    @Lob
-    @Column(name = "AVATARRURL")
-    private String avatarrurl;
+    @Column(name = "AVATARRURL", columnDefinition = "TEXT")
+    private String avatarUrl;
 
-    @Lob
-    @Column(name = "COVERURL")
-    private String coverurl;
+    @Column(name = "COVERURL", columnDefinition = "TEXT")
+    private String coverUrl;
 
     @Column(name = "STATUS")
     private Boolean status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USERNAME")
-    private User username;
-
+    @JoinColumn(name = "USERNAME") // Liên kết với cột USERNAME trong bảng IMAGES
+    private User user; // Liên kết với thực thể User
 }
