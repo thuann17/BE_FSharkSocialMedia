@@ -32,7 +32,10 @@ public class ChatController {
     public ResponseEntity<List<FriendDto>> getFriends(@PathVariable String username) {
         return ResponseEntity.ok(friendService.getFriendsByUserTarget(username));
     }
-
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("API is working");
+    }
 
     // Lấy tin nhắn giữa hai người dùng
     @GetMapping("/messages")
