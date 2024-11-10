@@ -10,8 +10,12 @@ import java.time.Instant;
 @Data
 public class PostDto implements Serializable {
     Integer id;
+    UserDto username;
     @Size(max = 200)
     String content;
     Instant createdate;
     Boolean status;
+    long commentCount;
+    long likeCount;
 }
+

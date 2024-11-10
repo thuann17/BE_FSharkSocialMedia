@@ -6,12 +6,14 @@ import lombok.Value;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class UserDto implements Serializable {
     @Size(max = 200)
     String username;
-    @Size(max = 30)
+    UserroleDto roles;
+    @Size(max = 255)
     String password;
     Boolean active;
     @Size(max = 200)
@@ -28,4 +30,5 @@ public class UserDto implements Serializable {
     String hometown;
     @Size(max = 100)
     String currency;
+    List<ImageDto> images;
 }
