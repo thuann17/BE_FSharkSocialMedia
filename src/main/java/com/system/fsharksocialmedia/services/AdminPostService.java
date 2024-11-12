@@ -11,12 +11,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class PostService {
+public class AdminPostService {
     @Autowired
     private PostRepository postRepository;
 
@@ -58,8 +57,8 @@ public class PostService {
         postDto.setId(post.getId());
         postDto.setCreatedate(post.getCreatedate());
         postDto.setContent(post.getContent());
-        postDto.setCommentCount(commentCount);
-        postDto.setLikeCount(likeCount);
+        postDto.setCountComment(commentCount);
+        postDto.setCountLike(likeCount);
 
         if (post.getUsername() != null) {
             UserDto userDto = new UserDto();

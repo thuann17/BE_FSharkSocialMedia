@@ -21,7 +21,7 @@ public class AdminProfileByUserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PostService postService;
+    private AdminPostService adminPostService;
     @Autowired
     private PostRepository postRepository;
 
@@ -99,8 +99,8 @@ public class AdminProfileByUserService {
         PostDto postDto = new PostDto();
         postDto.setId(post.getId());
         postDto.setContent(post.getContent());
-        postDto.setCommentCount(commentCount);
-        postDto.setLikeCount(likeCount);
+        postDto.setCountComment(commentCount);
+        postDto.setCountLike(likeCount);
         UserDto userDto = null;
         if (post.getUsername() != null) {
             userDto = new UserDto();
