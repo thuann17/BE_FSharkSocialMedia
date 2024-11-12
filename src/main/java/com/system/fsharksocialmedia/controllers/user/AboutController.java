@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.controllers;
+package com.system.fsharksocialmedia.controllers.user;
 
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.repositories.UserRepository;

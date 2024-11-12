@@ -19,26 +19,28 @@ import java.util.List;
 @RequestMapping("/api/user/post")
 public class UserPostController {
     @Autowired
-    private UserPostService postService;
+    private PostService postService;
+    @Autowired
+    private UserPostService uPostService;
 
     @GetMapping
-    public ResponseEntity<List<PostDto>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+    public List<PostDto> getPostsWithUserDetails(@RequestParam String username) {
+        return postService.getPostsWithUserDetails(username);
     }
 
     @PostMapping
     public ResponseEntity<PostDto> createPost(@RequestBody PostModel postModel) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(postService.addPost(postModel));
+        return ResponseEntity.status(HttpStatus.CREATED).body(uPostService.addPost(postModel));
     }
 
     @PutMapping("/{postID}")
     public ResponseEntity<PostDto> updatePost(@PathVariable Integer postID, @RequestBody PostModel postModel) {
-        return ResponseEntity.ok(postService.updatePost(postID, postModel));
+        return ResponseEntity.ok(uPostService.updatePost(postID, postModel));
     }
 
     @DeleteMapping("/{postID}")
     public ResponseEntity<Void> deletePost(@PathVariable Integer postID) {
-        postService.deletePost(postID);
+        uPostService.deletePost(postID);
         return ResponseEntity.noContent().build();
 
     }

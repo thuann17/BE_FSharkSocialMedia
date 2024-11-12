@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -104,7 +105,8 @@ public class PostService {
         return results.stream().map(result -> {
             PostDto postDto = new PostDto();
             UserDto userDto = new UserDto();
-            List<PostimageDto> postImageDtos = new ArrayList<>(); // Use PostimageDto instead of String
+            Set<PostimageDto> postImageDtos = new HashSet<>();
+
 
             // Set up PostDto
             postDto.setId((Integer) result[0]);
@@ -137,7 +139,7 @@ public class PostService {
                 postImageDtos.add(postImageDto); // Add the PostimageDto to the list
             }
             // Add images to the PostDto
-            postDto.setPostimages((Set<PostimageDto>) postImageDtos);
+            postDto.setPostimages( postImageDtos);
 
             return postDto;
         }).collect(Collectors.toList());
