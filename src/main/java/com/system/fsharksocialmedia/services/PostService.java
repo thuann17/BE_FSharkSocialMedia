@@ -58,8 +58,8 @@ public class PostService {
         postDto.setId(post.getId());
         postDto.setCreatedate(post.getCreatedate());
         postDto.setContent(post.getContent());
-        postDto.setCommentCount(commentCount);
-        postDto.setLikeCount(likeCount);
+        postDto.setCountLike(commentCount);
+        postDto.setCountLike(likeCount);
 
         if (post.getUsername() != null) {
             UserDto userDto = new UserDto();

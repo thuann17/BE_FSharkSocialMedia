@@ -99,8 +99,8 @@ public class AdminProfileByUserService {
         PostDto postDto = new PostDto();
         postDto.setId(post.getId());
         postDto.setContent(post.getContent());
-        postDto.setCommentCount(commentCount);
-        postDto.setLikeCount(likeCount);
+        postDto.setCountLike(commentCount);
+        postDto.setCountLike(likeCount);
         UserDto userDto = null;
         if (post.getUsername() != null) {
             userDto = new UserDto();
