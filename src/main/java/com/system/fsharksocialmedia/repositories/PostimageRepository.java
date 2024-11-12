@@ -8,7 +8,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+import java.util.List;
+
 public interface PostimageRepository extends JpaRepository<Postimage, Integer> {
     List<Postimage> findByPostid(Post postid);
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 }

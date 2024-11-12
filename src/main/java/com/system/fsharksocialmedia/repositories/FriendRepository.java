@@ -24,4 +24,9 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
 
     @Query(value = "EXEC GetFollowerByUsername :username", nativeQuery = true)
     List<Object[]> findFollowersByUsername(@Param("username") String username);
+<<<<<<< Updated upstream
+=======
+
+    boolean existsByUserSrcAndUserTarget(User userSrc, User userTarget);
+>>>>>>> Stashed changes
 }

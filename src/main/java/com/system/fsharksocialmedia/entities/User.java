@@ -76,7 +76,11 @@ public class User {
     @OneToMany(mappedBy = "username")
     private Set<Groupmember> groupmembers = new LinkedHashSet<>();
 
+<<<<<<< Updated upstream
     @OneToMany(mappedBy = "user") // Sửa tên thuộc tính ở đây
+=======
+    @OneToMany(mappedBy = "username") //sửa tên thuộc tính ở đây
+>>>>>>> Stashed changes
     private Set<Image> images = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "username")

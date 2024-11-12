@@ -20,7 +20,11 @@ public class FriendDto implements Serializable {
     Boolean status;
 
     String friendName;
+<<<<<<< Updated upstream
 
     String friendUserName;
 
+=======
+    String friendUserName;
+>>>>>>> Stashed changes
 }
