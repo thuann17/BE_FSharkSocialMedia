@@ -15,7 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-
+import java.util.Optional;
 @Service
 public class AccountService {
 
@@ -62,8 +62,7 @@ public class AccountService {
         user.setCurrency(dto.getCurrency());
         if (dto.getRoles() != null) {
             user.setRoles(convertToEntity(dto.getRoles()));
-        }
-
+}
         return user;
     }
 
@@ -102,7 +101,6 @@ public class AccountService {
 
     }
 
-
     // Delete a user by their ID
     public void deleteUser(String username) {
         if (!userRepository.existsById(username)) {
@@ -110,4 +108,16 @@ public class AccountService {
         }
         userRepository.deleteById(username);
     }
+
+    // Find User by username
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    // Get user by username and return DTO
+    public UserDto getUserByUsername(String username) {
+        Optional<User> userOptional = findByUsername(username);
+        return userOptional.map(this::convertToDto).orElse(null);
+    }
+
 }

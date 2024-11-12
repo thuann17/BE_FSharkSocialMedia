@@ -1,7 +1,6 @@
 package com.system.fsharksocialmedia.dtos;
 
 import lombok.Data;
-import lombok.Value;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -14,4 +13,5 @@ public class FriendDto implements Serializable {
     Instant createdate;
     Boolean status;
     String friendName;
+    String friendUserName;
 }

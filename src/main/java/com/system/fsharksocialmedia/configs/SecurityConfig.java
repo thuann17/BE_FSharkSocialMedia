@@ -1,5 +1,5 @@
-package com.system.fsharksocialmedia.configs;
 
+package com.system.fsharksocialmedia.configs;
 import com.system.fsharksocialmedia.filters.JwtAuthFilter;
 import com.system.fsharksocialmedia.services.CustomAccessDeniedHandler;
 import com.system.fsharksocialmedia.services.UserInfoService;

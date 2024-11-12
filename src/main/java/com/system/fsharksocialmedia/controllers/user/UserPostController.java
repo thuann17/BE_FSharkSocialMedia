@@ -1,11 +1,15 @@
 package com.system.fsharksocialmedia.controllers.user;
 
+
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.models.PostModel;
 import com.system.fsharksocialmedia.services.UserPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import com.system.fsharksocialmedia.services.PostService;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,12 +33,13 @@ public class UserPostController {
 
     @PutMapping("/{postID}")
     public ResponseEntity<PostDto> updatePost(@PathVariable Integer postID, @RequestBody PostModel postModel) {
-        return ResponseEntity.ok(postService.updatePost(postID,postModel));
+        return ResponseEntity.ok(postService.updatePost(postID, postModel));
     }
 
     @DeleteMapping("/{postID}")
     public ResponseEntity<Void> deletePost(@PathVariable Integer postID) {
         postService.deletePost(postID);
         return ResponseEntity.noContent().build();
+
     }
 }

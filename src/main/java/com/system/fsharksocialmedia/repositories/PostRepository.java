@@ -6,10 +6,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.data.repository.query.Param;
+
 
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
+
     Page<Post> findByContentContainingIgnoreCase(String title, Pageable pageable);
 
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.post.id = :postId")
@@ -19,5 +23,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     long countLikeByPost(Integer postId);
 
     List<Post> findByUsername(User user);
+
+    @Procedure(procedureName = "GetPostsWithUserDetails")
+    List<Object[]> getPostsWithUserDetails(@Param("inputUsername") String username);
 
 }

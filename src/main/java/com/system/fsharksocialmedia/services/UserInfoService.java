@@ -144,6 +144,4 @@ public class UserInfoService implements UserDetailsService {
         }
         return user;
     }
-
-
 }
