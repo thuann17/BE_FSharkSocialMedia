@@ -6,6 +6,7 @@ import lombok.Value;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Set;
 
 @Data
 public class PostDto implements Serializable {
@@ -15,7 +16,11 @@ public class PostDto implements Serializable {
     String content;
     Instant createdate;
     Boolean status;
-    long commentCount;
-    long likeCount;
+    Set<CommentDto> comments;
+    Set<LikepostDto> likeposts;
+    Set<NotificationDto> notifications;
+    Set<PostimageDto> postimages;
+    Set<ShareDto> shares;
+    Long countLike;
+    Long countComment;
 }
-
