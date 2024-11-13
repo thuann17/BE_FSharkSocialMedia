@@ -28,10 +28,7 @@ public class ChatController {
     private SimpMessagingTemplate messagingTemplate;
 
     // Lấy danh sách bạn bè
-    @GetMapping("/list/{username}")
-    public ResponseEntity<List<FriendDto>> getFriends(@PathVariable String username) {
-        return ResponseEntity.ok(friendService.getFriendsByUserTarget(username));
-    }
+
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("API is working");

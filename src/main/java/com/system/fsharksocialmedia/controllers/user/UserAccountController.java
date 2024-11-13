@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/api/useraccount")
+@RequestMapping("/api/user/account")
 public class UserAccountController {
     @Autowired
     AccountService useraccountService;

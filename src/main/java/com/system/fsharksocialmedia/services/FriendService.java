@@ -9,6 +9,7 @@ import com.system.fsharksocialmedia.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -43,29 +44,29 @@ public class FriendService {
     // Lấy danh sách bạn bè theo userTarget
     public List<FriendDto> getFriendsByUserTarget(String username) {
         if (username == null || username.isEmpty()) {
-            return List.of(); // Trả về danh sách rỗng nếu username null hoặc rỗng
+            return List.of(); // Return an empty list if username is invalid
         }
-
-        // Gọi thủ tục SQL để lấy danh sách bạn bè
+        // Call SQL procedure to get the list of friends
         List<Object[]> results = friendRepository.findFriendNamesByUsername(username);
 
-        // Chuyển đổi kết quả thành danh sách FriendDto
+        // Map the results to a list of FriendDto
         return results.stream().map(result -> {
             FriendDto friendDto = new FriendDto();
-            friendDto.setId((Integer) result[0]); // ID từ kết quả
-            // Chuyển đổi các thuộc tính khác từ kết quả Object[]
-            friendDto.setUserTarget(userService.toDto(userRepository.findByUsername((String) result[1]).orElse(null))); // Lấy UserDto từ User
-            friendDto.setUserSrc(userService.toDto(userRepository.findByUsername((String) result[2]).orElse(null))); // Lấy UserDto từ User
-            // Convert Timestamp to Instant
-            friendDto.setCreatedate(((Timestamp) result[3]).toInstant());
+            friendDto.setId((Integer) result[0]); // ID from the result
+            friendDto.setUserTarget(userService.toDto(userRepository.findByUsername((String) result[1]).orElse(null))); // UserDto conversion
+            friendDto.setUserSrc(userService.toDto(userRepository.findByUsername((String) result[2]).orElse(null))); // UserDto conversion
+            // Check if result[3] (createdate) is null before converting
+            Timestamp timestamp = (Timestamp) result[3];
+            if (timestamp != null) {
+                friendDto.setCreatedate(timestamp.toInstant()); // Convert Timestamp to Instant
+            }
             friendDto.setStatus((Boolean) result[4]); // status
-            friendDto.setFriendName((String) result[6]); // friend_name từ CASE trong thủ tục
+            friendDto.setFriendName((String) result[6]); // friend_name from CASE
             friendDto.setFriendUserName((String) result[5]);
-
             return friendDto;
         }).collect(Collectors.toList());
-
     }
+
 
     // Lấy danh sách người follow theo userTarget
     public List<FriendDto> getFollowers(String username) {
