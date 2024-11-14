@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Data
 public class UserModel {
     String username;
-    UserroleDto roles;
+    String roles;
     String password;
     Boolean active;
     String email;
