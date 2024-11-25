@@ -8,17 +8,17 @@ import java.time.Instant;
 
 @Data
 @Builder
-//@Document(collection = "Messages")
+@Document(collection = "messages")  // MongoDB collection name
 public class MessageModel {
-    MessageType type;
-    String sender;
-    String content;
-    Instant time;
-    String reciver;
+//    private MessageType type;
+    private String sender;
+    private String content;
+    private Instant time;
+    private String receiver;
 
-    public enum MessageType {
-        CHAT,
-        JOIN,
-        LEAVE
-    }
+//    public enum MessageType {
+//        CHAT,
+//        JOIN,
+//        LEAVE
+//    }
 }

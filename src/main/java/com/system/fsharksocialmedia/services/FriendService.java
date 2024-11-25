@@ -61,8 +61,8 @@ public class FriendService {
                 friendDto.setCreatedate(timestamp.toInstant()); // Convert Timestamp to Instant
             }
             friendDto.setStatus((Boolean) result[4]); // status
-            friendDto.setFriendName((String) result[6]); // friend_name from CASE
-            friendDto.setFriendUserName((String) result[5]);
+            friendDto.setFriendName((String) result[5]); // friend_name from CASE
+//            friendDto.setFriendUserName((String) result[5]);
             return friendDto;
         }).collect(Collectors.toList());
     }

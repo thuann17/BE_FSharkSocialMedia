@@ -17,5 +17,6 @@ public class LoginModel {
     String bio;
     String hometown;
     String currency;
+    String avatarUrl;
 }
 

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 @RequestMapping("/api")
 public class LoginController {
     @Autowired
@@ -57,7 +57,7 @@ public class LoginController {
         return ResponseEntity.ok(reponse);
     }
 
-    @PostMapping("/generateToken")
+    @PostMapping("/login")
     public ResponseEntity<Map<String, String>> authenticateAndGetToken(@RequestBody LoginModel loginModel) {
         Map<String, String> response = new HashMap<>();
         try {
@@ -71,6 +71,8 @@ public class LoginController {
                 System.out.println("role: " + roleName);
                 return ResponseEntity.ok(response);
             } else {
+                response.put("token", "");
+                response.put("role", "");
                 response.put("message", "Đăng nhập thất bại. Sai thông tin tài khoản!");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
@@ -81,16 +83,5 @@ public class LoginController {
             response.put("message", "Đã xảy ra lỗi trong quá trình xác thực!");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<UserDto>> getAll() {
-        List<UserDto> users = userInfoService.getAll();
-        return ResponseEntity.ok(users);
-    }
-
-    @PostMapping("/adduser")
-    public ResponseEntity<UserDto> add(@RequestBody LoginModel user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userInfoService.addUser(user));
     }
 }

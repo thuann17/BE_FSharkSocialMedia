@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/trip")
+@RequestMapping("/api/user/trip")
 public class TripController {
     @Autowired
     private TripService tripService;

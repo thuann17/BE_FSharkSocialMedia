@@ -18,15 +18,6 @@ import java.util.List;
 @RequestMapping("/api/friendrequests")
 public class FriendController {
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private FriendRepository friendRepository;
-
-    @Autowired // Make sure to autowire UserService
-    private UserService userService;
-
-    @Autowired
     private FriendService friendService;
 
     @GetMapping("/{username}")
