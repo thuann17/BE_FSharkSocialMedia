@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5500")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/account")
 public class AccountController {
     @Autowired
