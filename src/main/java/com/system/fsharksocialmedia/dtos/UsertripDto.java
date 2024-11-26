@@ -1,5 +1,6 @@
 package com.system.fsharksocialmedia.dtos;
 
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Value;
 
@@ -11,4 +12,6 @@ public class UsertripDto implements Serializable {
     TripDto tripid;
     UserDto userid;
     TriproleDto role;
+    @Size(max = 50)
+    String status;
 }

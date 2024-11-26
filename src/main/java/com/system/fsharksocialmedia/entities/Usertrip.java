@@ -1,6 +1,7 @@
 package com.system.fsharksocialmedia.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,5 +26,9 @@ public class Usertrip {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE")
     private Triprole role;
+
+    @Size(max = 50)
+    @Column(name = "STATUS", length = 50)
+    private String status;
 
 }
