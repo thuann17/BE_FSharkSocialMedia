@@ -3,55 +3,86 @@ package com.system.fsharksocialmedia.services;
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.TripModel;
-import com.system.fsharksocialmedia.repositories.TripRepository;
+import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 public class TripService {
 
     @Autowired
     private TripRepository tripRepository;
-
     @Autowired
     private UserInfoService userInfoService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private UsertripRepository usertripRepository;
+    @Autowired
+    private TriproleRepository triproleRepository;
+    @Autowired
+    private PlacetripRepository placetripRepository;
 
-    public TripDto createTrip(TripModel model) {
+    // 1. Tạo chuyến đi mới
+    public TripDto createTrip(TripModel tripModel, String username) {
         Trip trip = new Trip();
-        trip.setTripname(model.getTripName());
-        trip.setStartdate(model.getStartDate());
-        trip.setEnddate(model.getEndDate());
+        User u = userRepository.findByUsername(username).orElse(null);
+        Triprole role = triproleRepository.findById(1).orElse(null);
+        if (tripModel.getTripName() == null || tripModel.getTripName().isEmpty()) {
+            trip.setTripname("Chuyến đi mới");
+        } else {
+            trip.setTripname(tripModel.getTripName());
+        }
+        trip.setStartdate(tripModel.getStartDate());
+        trip.setEnddate(tripModel.getEndDate());
         trip.setCreatedate(Instant.now());
-        trip.setDescription(model.getDescription());
-        trip = tripRepository.save(trip);
-        return toTripDto(trip);
+        trip.setDescription(tripModel.getDescription());
+        Trip savedTrip = tripRepository.save(trip);
+        Usertrip userTrip = new Usertrip();
+        userTrip.setTripid(savedTrip);
+        userTrip.setUserid(u);
+        userTrip.setRole(role);
+        usertripRepository.save(userTrip);
+        return toTripDto(savedTrip);
     }
 
-//    public PlacetripDto addPlaceToTrip(Integer tripId, PlaceDto placeDto, Instant datetime, String note) {
-//        // Tìm Trip theo ID
-//        Optional<Trip> tripOptional = tripRepository.findById(tripId);
-//        if (!tripOptional.isPresent()) {
-//            throw new IllegalArgumentException("Trip not found");
-//        }
-//        // Tạo đối tượng Place từ PlaceDto
-//        Place place = new Place();
-//        place.setNamePlace(placeDto.getNameplace());
-//        place.setUrlMap(placeDto.getUrlmap());
-//        place.setAddress(placeDto.getAddress());
-//        place.setDescription(placeDto.getDescription());
-//        Placetrip placeTrip = new Placetrip();
-//        placeTrip.setTrip(tripOptional.get());
-//        placeTrip.setPlace(place);
-//        placeTrip.setDateTime(datetime);
-//        placeTrip.setNote(note);
-//        placeTrip = placeTripRepository.save(placeTrip);
-//        return toPlaceTripDto(placeTrip);
-//    }
+    public String requestJoinTrip(Integer tripId, String username) {
+        Optional<Trip> tripOptional = tripRepository.findById(tripId);
+        if (tripOptional.isEmpty()) {
+            return "Chuyến đi không tồn tại!";
+        }
+        Usertrip userTrip = new Usertrip();
+        userTrip.setTripid(tripOptional.get());
+        User u = userRepository.findByUsername(username).orElse(null);
+        Triprole role = triproleRepository.findById(2).orElse(null);
+        userTrip.setUserid(u);
+        userTrip.setRole(role);
+        usertripRepository.save(userTrip);
+        return "Yêu cầu tham gia đã được gửi!";
+    }
 
+    public String approveOrRejectRequest(Integer userTripId, boolean isApproved) {
+        Optional<Usertrip> userTripOptional = usertripRepository.findById(userTripId);
+        if (userTripOptional.isEmpty()) {
+            return "Yêu cầu không tồn tại!";
+        }
+
+        Usertrip userTrip = userTripOptional.get();
+        if (isApproved) {
+//            userTrip.setStatus("APPROVED");
+            usertripRepository.save(userTrip);
+            return "Yêu cầu đã được phê duyệt!";
+        } else {
+            usertripRepository.delete(userTrip);
+            return "Yêu cầu đã bị từ chối!";
+        }
+    }
 
     // Convert Usertrip entity to UsertripDto
     public UsertripDto toUserTripDto(Usertrip userTrip) {
@@ -63,6 +94,38 @@ public class TripService {
         return dto;
     }
 
+    public PlacetripDto recordPlace(Integer tripId, Integer placeId, Instant dateTime, String note) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new RuntimeException("Trip not found"));
+        Place place = new Place(); // Thêm phần tìm kiếm hoặc khởi tạo Place
+        place.setId(placeId);
+
+        Placetrip placeTrip = new Placetrip();
+        placeTrip.setTripid(trip);
+        placeTrip.setPlaceid(place);
+        placeTrip.setDatetime(dateTime);
+        placeTrip.setNote(note);
+
+        Placetrip savedPlaceTrip = placetripRepository.save(placeTrip);
+        return toPlaceTripDto(savedPlaceTrip);
+    }
+
+    // 5. Lấy danh sách chuyến đi của người dùng
+    public List<TripDto> getTripsByUser(String username) {
+        List<Usertrip> userTrips = usertripRepository.findByUserid_Username(username);
+        return userTrips.stream()
+                .map(userTrip -> toTripDto(userTrip.getTripid()))
+                .collect(Collectors.toList());
+    }
+
+    // 6. Hoàn thành chuyến đi
+    public TripDto completeTrip(Integer tripId) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new RuntimeException("Trip not found"));
+//        trip.setStatus("COMPLETED");
+        Trip savedTrip = tripRepository.save(trip);
+        return toTripDto(savedTrip);
+    }
 
     // Convert Trip entity to TripDto
     public TripDto toTripDto(Trip trip) {
