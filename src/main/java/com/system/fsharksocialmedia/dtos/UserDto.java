@@ -50,8 +50,5 @@ public class UserDto implements Serializable {
     private Set<Likecmt> likecmts;
     private Set<UsertripDto> usertrips;
 
-    public UserDto(String username) {
-        this.username = username;
-    }
 
 }

@@ -3,12 +3,14 @@ package com.system.fsharksocialmedia.services;
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.PostModel;
-import com.system.fsharksocialmedia.repositories.PostRepository;
+import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,15 @@ import java.util.stream.Collectors;
 public class UserPostService {
     @Autowired
     PostRepository postRepository;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    LikepostRepository likepostRepository;
+    @Autowired
+    CommentRepository commentRepository;
+    @Autowired
+    LikecmtRepository likecmtRepository;
+
 
     // Get all posts
     public List<PostDto> getAllPosts() {
@@ -107,6 +118,8 @@ public class UserPostService {
         if (comment.getUsername() != null) {
             UserDto userDto = new UserDto();
             userDto.setUsername(comment.getUsername().getUsername());
+            userDto.setFirstname(comment.getUsername().getFirstname());
+            userDto.setLastname(comment.getUsername().getLastname());
             userDto.setBio(comment.getUsername().getBio());
             userDto.setEmail(comment.getUsername().getEmail());
             commentDto.setUsername(userDto);
@@ -179,5 +192,100 @@ public class UserPostService {
         }
 
         return shareDto;
+    }
+
+
+    public Long countLikesForPost(Integer postId) {
+        return likepostRepository.countByPostId(postId);
+    }
+
+    @Transactional
+    public LikepostDto likePost(String username, Integer postId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Bài đăng không tồn tại!"));
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        Optional<Likepost> existingLike = likepostRepository.findByUsernameAndPost(user, post);
+        if (existingLike.isPresent()) {
+            throw new RuntimeException("Người dùng đã thích bài viết này!");
+        }
+
+        Likepost likePost = new Likepost();
+        likePost.setUsername(user);
+        likePost.setPost(post);
+
+        Likepost savedLikePost = likepostRepository.save(likePost);
+
+        LikepostDto likepostDto = new LikepostDto();
+        likepostDto.setId(savedLikePost.getId());
+
+        UserDto userDto = new UserDto();
+        userDto.setUsername(user.getUsername());
+        userDto.setBio(user.getBio());
+        userDto.setEmail(user.getEmail());
+
+        likepostDto.setUsername(userDto);
+
+        PostDto postDto = convertToDto(post);
+        likepostDto.setPost(postDto);
+
+        return likepostDto;
+    }
+
+
+    //unlike bài viết
+    @Transactional
+    public String removeLike(Integer postId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        Optional<Likepost> existingLike = Optional.ofNullable(likepostRepository.findByUsernameAndPostId(user, postId));
+
+        if (existingLike.isPresent()) {
+            // If the like exists, delete it
+            likepostRepository.delete(existingLike.get());
+            return "Successfully unliked the post.";
+        } else {
+            return "You haven't liked this post yet.";
+        }
+    }
+
+    //kiểm tra bài viết đã thích chưa?
+    public boolean hasUserLikedPost(String username, Integer postId) {
+        // Fetch the user entity based on the username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        // Query the repository to check if the like exists
+        return likepostRepository.existsByUsernameAndPostId(user, postId);
+    }
+
+    //lấy cmt theo postID
+    public List<CommentDto> getCommentsByPostId(Integer postId) {
+        return commentRepository.findByPostId(postId)
+                .stream()
+                .map(this::convertToCommentDto)
+                .collect(Collectors.toList());
+    }
+
+    public int getLikesByCommentId(Integer commentId) {
+        return likecmtRepository.getLikeCountByCommentId(commentId);
+    }
+
+    public boolean isLikedByUser(Integer commentId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return likecmtRepository.existsByCommentIdAndUsername(commentId, user);
     }
 }
