@@ -96,4 +96,5 @@ public class User {
     @OneToMany(mappedBy = "userid")
     private Set<Usertrip> usertrips = new LinkedHashSet<>();
 
+
 }

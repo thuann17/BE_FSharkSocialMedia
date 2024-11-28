@@ -1,6 +1,7 @@
 package com.system.fsharksocialmedia.controllers.user;
 
 import com.system.fsharksocialmedia.dtos.FriendDto;
+import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.repositories.FriendRepository;
 import com.system.fsharksocialmedia.repositories.UserRepository;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -99,8 +101,14 @@ public class FriendController {
 
     //láy danh sách gơị ý kb
     @GetMapping("/without-friends/{username}")
-    public ResponseEntity<List<User>> getUsersWithoutFriends(@PathVariable("username") String username) {
+    public ResponseEntity<List<UserDto>> getUsersWithoutFriends(@PathVariable("username") String username) {
         List<User> usersWithoutFriends = friendService.getUsersWithoutFriends(username);
-        return ResponseEntity.ok(usersWithoutFriends);
+
+        // Map User entities to UserDto
+        List<UserDto> userDtos = usersWithoutFriends.stream()
+                .map(user -> userService.toDto(user)) // Use a mapping method
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDtos);
     }
 }
