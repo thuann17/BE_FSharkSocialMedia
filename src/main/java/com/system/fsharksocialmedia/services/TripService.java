@@ -62,6 +62,7 @@ public class TripService {
         User u = userRepository.findByUsername(username).orElse(null);
         Triprole role = triproleRepository.findById(2).orElse(null);
         userTrip.setUserid(u);
+        userTrip.setStatus("");
         userTrip.setRole(role);
         usertripRepository.save(userTrip);
         return "Yêu cầu tham gia đã được gửi!";
@@ -72,10 +73,9 @@ public class TripService {
         if (userTripOptional.isEmpty()) {
             return "Yêu cầu không tồn tại!";
         }
-
         Usertrip userTrip = userTripOptional.get();
         if (isApproved) {
-//            userTrip.setStatus("APPROVED");
+            userTrip.setStatus("");
             usertripRepository.save(userTrip);
             return "Yêu cầu đã được phê duyệt!";
         } else {
