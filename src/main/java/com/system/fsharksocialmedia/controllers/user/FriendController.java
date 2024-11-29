@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 public class FriendController {
     @Autowired
     private FriendService friendService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/{username}")
     public ResponseEntity<List<FriendDto>> getFriendsByUserTarget(@PathVariable String username) {
