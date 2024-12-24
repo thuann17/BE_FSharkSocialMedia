@@ -11,4 +11,5 @@ public class MessageDto implements Serializable {
     private String receiver;
     private String content;
     private Instant timestamp;
+
 }

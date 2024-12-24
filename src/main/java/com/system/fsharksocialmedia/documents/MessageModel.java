@@ -10,12 +10,12 @@ import java.time.Instant;
 @Builder
 @Document(collection = "messages")  // MongoDB collection name
 public class MessageModel {
-//    private MessageType type;
+    //    private MessageType type;
     private String sender;
     private String content;
     private Instant time;
     private String receiver;
-
+    private boolean read;
 //    public enum MessageType {
 //        CHAT,
 //        JOIN,

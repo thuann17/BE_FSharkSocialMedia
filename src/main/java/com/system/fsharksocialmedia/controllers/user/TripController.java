@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/user/trip")
 public class TripController {
     @Autowired
