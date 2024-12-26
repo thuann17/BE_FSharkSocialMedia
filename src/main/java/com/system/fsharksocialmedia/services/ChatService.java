@@ -5,6 +5,7 @@ import com.system.fsharksocialmedia.documents.MessageModel;
 import com.system.fsharksocialmedia.reposmongo.MessageMongoReps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,15 @@ public class ChatService {
     }
 
 
+    public void deleteMessagesForUser(String user1, String user2, String currentUser) {
+        if (user1.equals(currentUser)) {
+            // Xóa tin nhắn của user1
+            messageMongoReps.deleteBySenderAndReceiver(user1, user2);
+        } else if (user2.equals(currentUser)) {
+            // Xóa tin nhắn của user2
+            messageMongoReps.deleteBySenderAndReceiver(user2, user1);
+        }
+    }
 
     public MessageDto converToDto(MessageModel messageMongo) {
         MessageDto messageDto = new MessageDto();

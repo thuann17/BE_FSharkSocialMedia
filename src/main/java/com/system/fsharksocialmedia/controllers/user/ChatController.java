@@ -9,20 +9,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.List;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping
 public class ChatController {
     @Autowired
     private ChatService chatService;
     @Autowired
     private MessageMongoReps messageMongoReps;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     // Lấy tin nhắn giữa hai người dùng
     @GetMapping("/api/user/chat/messages")
@@ -36,8 +38,8 @@ public class ChatController {
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     public MessageModel sendMessage(@Payload MessageModel chatMessage) {
-        chatMessage.setTime(Instant.now());
         try {
+            chatMessage.setTime(Instant.now());
             messageMongoReps.save(chatMessage); // Lưu tin nhắn vào DB
             System.out.println("Luu tin nhan vao db");
         } catch (Exception e) {
@@ -47,11 +49,23 @@ public class ChatController {
         return chatMessage;
     }
 
-    // Xử lý khi người dùng tham gia
-    @MessageMapping("/chat.addUser")
-    @SendTo("/topic/public")
-    public MessageModel addUser(@Payload MessageModel chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        return chatMessage;
+    // check soạn tin
+    @MessageMapping("/chat.typing")
+    public void typing(@Payload MessageModel chatMessage) {
+        messagingTemplate.convertAndSend("/topic/typing/" + chatMessage.getReceiver(), chatMessage);
     }
+
+    // xoá tin nhắn
+    @DeleteMapping("/deleteMessages")
+    public String deleteMessages(@RequestParam String user1, @RequestParam String user2, @RequestParam String currentUser) {
+        chatService.deleteMessagesForUser(user1, user2, currentUser);
+        return "Messages deleted successfully for " + currentUser;
+    }
+    // Xử lý khi người dùng tham gia
+//    @MessageMapping("/chat.addUser")
+//    @SendTo("/topic/public")
+//    public MessageModel addUser(@Payload MessageModel chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+//        return chatMessage;
+//    }
 }
