@@ -1,9 +1,10 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.TripModel;
 import com.system.fsharksocialmedia.repositories.*;
+import com.system.fsharksocialmedia.services.other.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class TripService {
     // 1. Tạo chuyến đi mới
     public TripDto createTrip(TripModel tripModel, String username) {
         Trip trip = new Trip();
-        User u = userRepository.findByUsername(username).orElse(null);
+        User u = userRepository.findById(username).orElse(null);
         Triprole role = triproleRepository.findById(1).orElse(null);
         if (tripModel.getTripName() == null || tripModel.getTripName().isEmpty()) {
             trip.setTripname("Chuyến đi mới");
@@ -59,7 +60,7 @@ public class TripService {
         }
         Usertrip userTrip = new Usertrip();
         userTrip.setTripid(tripOptional.get());
-        User u = userRepository.findByUsername(username).orElse(null);
+        User u = userRepository.findById(username).orElse(null);
         Triprole role = triproleRepository.findById(2).orElse(null);
         userTrip.setUserid(u);
         userTrip.setStatus("");

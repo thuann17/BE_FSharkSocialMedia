@@ -3,9 +3,8 @@ package com.system.fsharksocialmedia.controllers.user;
 import com.system.fsharksocialmedia.dtos.PlacetripDto;
 import com.system.fsharksocialmedia.dtos.TripDto;
 import com.system.fsharksocialmedia.models.TripModel;
-import com.system.fsharksocialmedia.services.TripService;
+import com.system.fsharksocialmedia.services.user.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;

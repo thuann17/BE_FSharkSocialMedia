@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.admin;
 
 import com.system.fsharksocialmedia.dtos.ImageDto;
 import com.system.fsharksocialmedia.dtos.PostDto;
@@ -11,6 +11,7 @@ import com.system.fsharksocialmedia.entities.Userrole;
 import com.system.fsharksocialmedia.exceptions.UserNotFoundException;
 import com.system.fsharksocialmedia.repositories.PostRepository;
 import com.system.fsharksocialmedia.repositories.UserRepository;
+import com.system.fsharksocialmedia.services.user.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

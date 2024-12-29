@@ -3,7 +3,7 @@ package com.system.fsharksocialmedia.controllers.admin;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.models.UserModel;
 import com.system.fsharksocialmedia.repositories.UserRepository;
-import com.system.fsharksocialmedia.services.AccountService;
+import com.system.fsharksocialmedia.services.admin.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;

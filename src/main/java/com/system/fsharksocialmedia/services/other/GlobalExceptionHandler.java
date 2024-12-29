@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.other;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

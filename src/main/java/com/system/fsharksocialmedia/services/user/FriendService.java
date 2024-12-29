@@ -1,11 +1,11 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.FriendDto;
-import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.Friend;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.repositories.FriendRepository;
 import com.system.fsharksocialmedia.repositories.UserRepository;
+import com.system.fsharksocialmedia.services.admin.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,8 +53,8 @@ public class FriendService {
         return results.stream().map(result -> {
             FriendDto friendDto = new FriendDto();
             friendDto.setId((Integer) result[0]); // ID from the result
-            friendDto.setUserTarget(userService.toDto(userRepository.findByUsername((String) result[1]).orElse(null))); // UserDto conversion
-            friendDto.setUserSrc(userService.toDto(userRepository.findByUsername((String) result[2]).orElse(null))); // UserDto conversion
+            friendDto.setUserTarget(userService.toDto(userRepository.findById((String) result[1]).orElse(null))); // UserDto conversion
+            friendDto.setUserSrc(userService.toDto(userRepository.findById((String) result[2]).orElse(null))); // UserDto conversion
             // Check if result[3] (createdate) is null before converting
             Timestamp timestamp = (Timestamp) result[3];
             if (timestamp != null) {
@@ -85,12 +85,12 @@ public class FriendService {
 
             // Convert userTarget to UserDto, handling potential null
             String userTargetUsername = (String) result[1];
-            User userTarget = userRepository.findByUsername(userTargetUsername).orElse(null);
+            User userTarget = userRepository.findById(userTargetUsername).orElse(null);
             friendDto.setUserTarget(userTarget != null ? userService.toDto(userTarget) : null);
 
             // Convert userSrc to UserDto, handling potential null
             String userSrcUsername = (String) result[2];
-            User userSrc = userRepository.findByUsername(userSrcUsername).orElse(null);
+            User userSrc = userRepository.findById(userSrcUsername).orElse(null);
             friendDto.setUserSrc(userSrc != null ? userService.toDto(userSrc) : null);
 
             friendDto.setCreatedate(((Timestamp) result[3]).toInstant());
@@ -115,8 +115,8 @@ public class FriendService {
     // Method to add a friend
     public String addFriend(String username1, String username2) {
         // Retrieve both users by username
-        Optional<User> user1Optional = userRepository.findByUsername(username1);
-        Optional<User> user2Optional = userRepository.findByUsername(username2);
+        Optional<User> user1Optional = userRepository.findById(username1);
+        Optional<User> user2Optional = userRepository.findById(username2);
 
         if (!user1Optional.isPresent() || !user2Optional.isPresent()) {
             throw new IllegalArgumentException("User IDs cannot be null or invalid");

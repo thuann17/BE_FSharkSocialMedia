@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.documents.MessageDto;
 import com.system.fsharksocialmedia.documents.MessageModel;
@@ -6,7 +6,6 @@ import com.system.fsharksocialmedia.reposmongo.MessageMongoReps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 

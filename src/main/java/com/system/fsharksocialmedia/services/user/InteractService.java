@@ -1,16 +1,15 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.InteractModel;
 import com.system.fsharksocialmedia.repositories.*;
+import com.system.fsharksocialmedia.services.other.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class InteractService {
@@ -27,7 +26,7 @@ public class InteractService {
 
     // Like a post
     public LikepostDto likePost(InteractModel model) {
-        User u = userRepository.findByUsername(model.getUsername()).orElseThrow(() ->
+        User u = userRepository.findById(model.getUsername()).orElseThrow(() ->
                 new RuntimeException("Khôgn có username: " + model.getUsername()));
         Post p = postRepository.findById(model.getPostID()).orElseThrow(() ->
                 new RuntimeException("Không có postID: " + model.getPostID()));
@@ -53,7 +52,7 @@ public class InteractService {
 
     // Add a comment
     public CommentDto commentPost(InteractModel model) {
-        User u = userRepository.findByUsername(model.getUsername()).orElseThrow(() ->
+        User u = userRepository.findById(model.getUsername()).orElseThrow(() ->
                 new RuntimeException("Khôgn có username: " + model.getUsername()));
         Post p = postRepository.findById(model.getPostID()).orElseThrow(() ->
                 new RuntimeException("Không có postID: " + model.getPostID()));
@@ -80,7 +79,7 @@ public class InteractService {
     }
 
     public CommentDto updateComment(Integer commentID, InteractModel model) {
-        User u = userRepository.findByUsername(model.getUsername()).orElseThrow(() ->
+        User u = userRepository.findById(model.getUsername()).orElseThrow(() ->
                 new RuntimeException("Khôgn có username: " + model.getUsername()));
         Post p = postRepository.findById(model.getPostID()).orElseThrow(() ->
                 new RuntimeException("Không có postID: " + model.getPostID()));
@@ -96,7 +95,7 @@ public class InteractService {
 
     //  share bài
     public ShareDto sharePost(InteractModel model) {
-        User u = userRepository.findByUsername(model.getUsername()).orElseThrow(() ->
+        User u = userRepository.findById(model.getUsername()).orElseThrow(() ->
                 new RuntimeException("Khôgn có username: " + model.getUsername()));
         Post p = postRepository.findById(model.getPostID()).orElseThrow(() ->
                 new RuntimeException("Không có postID: " + model.getPostID()));

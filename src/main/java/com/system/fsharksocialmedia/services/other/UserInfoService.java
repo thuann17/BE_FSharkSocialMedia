@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.other;
 
 import com.system.fsharksocialmedia.dtos.ImageDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
@@ -6,7 +6,7 @@ import com.system.fsharksocialmedia.dtos.UserroleDto;
 import com.system.fsharksocialmedia.entities.Image;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.entities.Userrole;
-import com.system.fsharksocialmedia.models.LoginModel;
+import com.system.fsharksocialmedia.models.UserModel;
 import com.system.fsharksocialmedia.repositories.ImageRepository;
 import com.system.fsharksocialmedia.repositories.UserRepository;
 import com.system.fsharksocialmedia.repositories.UserroleRepository;
@@ -45,7 +45,7 @@ public class UserInfoService implements UserDetailsService {
     }
 
     public UserDto getByUsername(String username) {
-        User u = userRepository.findByUsername(username).orElse(null);
+        User u = userRepository.findById(username).orElse(null);
         return convertToUserDto(u);
     }
 
@@ -58,25 +58,45 @@ public class UserInfoService implements UserDetailsService {
         return userDto;
     }
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userDetail = repository.findByUsername(username);
+        Optional<User> userDetail = repository.findById(username);
         return userDetail.map(UserInfoDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 
-    public UserDto addUser(LoginModel model) {
-        Optional<User> existingUser = userRepository.findByUsername(model.getUsername());
+    public UserDto addUser(UserModel model) {
+      Optional<User> existingUser = userRepository.findById(model.getUsername());
         if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new IllegalArgumentException("User data or Username is missing");
+        }
+        if (model.getUsername() == null || model.getUsername().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+        if (model.getPassword() == null || model.getPassword().length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters long");
+        }
+        if (model.getEmail() == null || model.getEmail().isEmpty() || !model.getEmail().contains("@")) {
+            throw new IllegalArgumentException("Invalid email address");
+        }
+        if (model.getLastname() == null || model.getLastname().isEmpty()) {
+            throw new IllegalArgumentException("Lastname cannot be empty");
+        }
+        if (model.getFirstname() == null || model.getFirstname().isEmpty()) {
+            throw new IllegalArgumentException("Firstname cannot be empty");
+        }
+        if (model.getBirthday() == null) {
+            throw new IllegalArgumentException("Birthday cannot be null");
+        }
+        if (model.getGender() == null) {
+            throw new IllegalArgumentException("Gender cannot be null");
         }
         User us = new User();
         us.setUsername(model.getUsername());
         us.setPassword(encoder.encode(model.getPassword()));
         us.setEmail(model.getEmail());
-        us.setActive(Optional.ofNullable(model.getActive()).orElse(true));
-        us.setGender(model.getGender());
+        us.setActive(true);
+        us.setGender(true);
         us.setLastname(model.getLastname());
         us.setFirstname(model.getFirstname());
         us.setBirthday(model.getBirthday());
@@ -85,13 +105,10 @@ public class UserInfoService implements UserDetailsService {
         us.setCurrency(model.getCurrency());
         Userrole role = userroleRepository.findById(2)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + model.getRoleId()));
-        System.out.println("Role: " + role);
         us.setRoles(role);
-
         String avatarUrl = model.getAvatarUrl() != null ? model.getAvatarUrl() :
                 "https://firebasestorage.googleapis.com/v0/b/socialmedia-8bff2.appspot.com/o/ThuanImage%2Favt.jpg?alt=media";
         Image image = new Image();
-        System.out.println("avatarUrl: " + avatarUrl);
         image.setAvatarrurl(avatarUrl);
         image.setUsername(us);
         image.setStatus(true);
@@ -99,13 +116,11 @@ public class UserInfoService implements UserDetailsService {
         Set<Image> imageSet = new HashSet<>();
         imageSet.add(image);
         us.setImages(imageSet);
-        System.out.println("Set: " + imageSet);
         try {
             User savedUser = repository.save(us);
             imageRepository.save(image);
             return convertToUserDto(savedUser);
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Could not commit JPA transaction", e);
         }

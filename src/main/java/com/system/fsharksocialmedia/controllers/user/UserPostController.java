@@ -3,12 +3,12 @@ package com.system.fsharksocialmedia.controllers.user;
 
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.models.PostModel;
-import com.system.fsharksocialmedia.services.UserPostService;
+import com.system.fsharksocialmedia.services.user.UserPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.system.fsharksocialmedia.services.PostService;
+import com.system.fsharksocialmedia.services.user.PostService;
 
 import org.springframework.web.bind.annotation.*;
 
