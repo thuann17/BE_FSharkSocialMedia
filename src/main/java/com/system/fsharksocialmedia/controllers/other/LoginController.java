@@ -3,12 +3,12 @@ package com.system.fsharksocialmedia.controllers.other;
 
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.models.LoginModel;
-import com.system.fsharksocialmedia.services.JwtService;
-import com.system.fsharksocialmedia.services.UserInfoService;
+import com.system.fsharksocialmedia.models.UserModel;
+import com.system.fsharksocialmedia.services.other.JwtService;
+import com.system.fsharksocialmedia.services.other.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,25 +36,12 @@ public class LoginController {
         return ResponseEntity.ok(userInfoService.getByUsername(username));
     }
 
-    @PostMapping("/addNewUser")
-    public ResponseEntity<UserDto> addNewUser(@RequestBody LoginModel model) {
+    @PostMapping("/register")
+    public ResponseEntity<UserDto> addNewUser(@RequestBody UserModel model) {
         UserDto createdUser = userInfoService.addUser(model);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    @GetMapping("/user/userProfile")
-    @PreAuthorize("hasAuthority('User')")
-    public String userProfile() {
-        return "Welcome to User Profile";
-    }
-
-    @GetMapping("/admin/adminProfile")
-    @PreAuthorize("hasAuthority('Admin')")
-    public ResponseEntity<?> adminProfile() {
-        Map<String, String> reponse = new HashMap<String, String>();
-        reponse.put("message:", "Welcome to Admin Profile");
-        return ResponseEntity.ok(reponse);
-    }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> authenticateAndGetToken(@RequestBody LoginModel loginModel) {

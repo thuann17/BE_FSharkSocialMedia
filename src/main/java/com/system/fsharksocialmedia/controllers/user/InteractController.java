@@ -2,11 +2,9 @@ package com.system.fsharksocialmedia.controllers.user;
 
 import com.system.fsharksocialmedia.dtos.CommentDto;
 import com.system.fsharksocialmedia.dtos.LikepostDto;
-import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.dtos.ShareDto;
-import com.system.fsharksocialmedia.entities.Likepost;
 import com.system.fsharksocialmedia.models.InteractModel;
-import com.system.fsharksocialmedia.services.InteractService;
+import com.system.fsharksocialmedia.services.user.InteractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

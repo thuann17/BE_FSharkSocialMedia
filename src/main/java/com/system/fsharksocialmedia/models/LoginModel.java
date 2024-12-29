@@ -7,16 +7,5 @@ import java.time.LocalDate;
 public class LoginModel {
     String username;
     String password;
-    String email;
-    Integer roleId;
-    Boolean active;
-    Boolean gender;
-    String lastname;
-    String firstname;
-    LocalDate birthday;
-    String bio;
-    String hometown;
-    String currency;
-    String avatarUrl;
 }
 

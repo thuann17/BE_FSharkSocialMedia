@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.admin;
 
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.dtos.UserDto;

@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;

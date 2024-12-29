@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.other;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

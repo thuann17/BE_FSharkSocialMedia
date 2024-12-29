@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.other;
 
 import com.system.fsharksocialmedia.entities.User;
 import org.springframework.security.core.GrantedAuthority;

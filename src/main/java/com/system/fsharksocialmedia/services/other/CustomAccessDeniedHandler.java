@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.other;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

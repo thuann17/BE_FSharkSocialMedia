@@ -1,8 +1,8 @@
 
 package com.system.fsharksocialmedia.configs;
 import com.system.fsharksocialmedia.filters.JwtAuthFilter;
-import com.system.fsharksocialmedia.services.CustomAccessDeniedHandler;
-import com.system.fsharksocialmedia.services.UserInfoService;
+import com.system.fsharksocialmedia.services.other.CustomAccessDeniedHandler;
+import com.system.fsharksocialmedia.services.other.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

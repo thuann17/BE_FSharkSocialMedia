@@ -2,7 +2,7 @@ package com.system.fsharksocialmedia.controllers.admin;
 
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
-import com.system.fsharksocialmedia.services.AdminProfileByUserService;
+import com.system.fsharksocialmedia.services.admin.AdminProfileByUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

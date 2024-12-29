@@ -3,7 +3,7 @@ package com.system.fsharksocialmedia.controllers.user;
 import com.system.fsharksocialmedia.documents.MessageDto;
 import com.system.fsharksocialmedia.documents.MessageModel;
 import com.system.fsharksocialmedia.reposmongo.MessageMongoReps;
-import com.system.fsharksocialmedia.services.ChatService;
+import com.system.fsharksocialmedia.services.user.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;

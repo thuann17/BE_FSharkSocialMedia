@@ -1,4 +1,4 @@
-package com.system.fsharksocialmedia.services;
+package com.system.fsharksocialmedia.services.admin;
 
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.User;
@@ -17,7 +17,6 @@ public class UserService {
     @Autowired
     private final UserRepository userRepository;
 
-    // Constructor injection for userRepository
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -61,7 +60,7 @@ public class UserService {
 
     // Find User by username
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findById(username);
     }
 
     // Get user by username and return DTO

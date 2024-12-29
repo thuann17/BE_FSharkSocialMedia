@@ -1,7 +1,7 @@
 package com.system.fsharksocialmedia.filters;
 
-import com.system.fsharksocialmedia.services.JwtService;
-import com.system.fsharksocialmedia.services.UserInfoService;
+import com.system.fsharksocialmedia.services.other.JwtService;
+import com.system.fsharksocialmedia.services.other.UserInfoService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
