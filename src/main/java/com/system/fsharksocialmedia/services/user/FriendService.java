@@ -142,9 +142,8 @@ public class FriendService {
 
     // Method to delete a friend by ID
     public void deleteFriendRequest(Integer id) {
-        Friend friendrequest = friendRepository.findById(id).orElseThrow(() -> new RuntimeException("Friend request not found")); // Throw exception if not found
-
-        friendRepository.delete(friendrequest); // Delete the friend request
+        Friend friendrequest = friendRepository.findById(id).orElseThrow(() -> new RuntimeException("Friend request not found"));
+        friendRepository.delete(friendrequest);
     }
 
 }
