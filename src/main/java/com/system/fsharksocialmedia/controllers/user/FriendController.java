@@ -3,6 +3,7 @@ package com.system.fsharksocialmedia.controllers.user;
 import com.system.fsharksocialmedia.dtos.FriendDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.User;
+import com.system.fsharksocialmedia.services.admin.UserService;
 import com.system.fsharksocialmedia.services.user.FriendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

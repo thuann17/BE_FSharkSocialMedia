@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
     Page<User> findByUsernameContainingIgnoreCase(String username, Pageable pageable);
-    //    Optional<User> findByUsername(String username);
+        Optional<User> findByUsername(String username);
     @Query(value = "EXEC GetUsersWithoutFriends :username", nativeQuery = true)
     List<User> findUsersWithoutFriends(@Param("username") String username);
     User findByEmail(String email); // Find by email for initiating reset
