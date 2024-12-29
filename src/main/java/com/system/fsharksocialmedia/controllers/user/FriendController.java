@@ -26,23 +26,18 @@ public class FriendController {
     public ResponseEntity<List<FriendDto>> getFriendsByUserTarget(@PathVariable String username) {
         List<FriendDto> friends = friendService.getFriendsByUserTarget(username);
         if (friends.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content if no friends found
+            return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(friends); // 200 OK with the list of friends
+        return ResponseEntity.ok(friends);
     }
 
     // cập nhaạt trạng thái
     @PutMapping("/{id}/update-status")
     public ResponseEntity<FriendDto> updateFriendStatus(@PathVariable Integer id) {
-        // Call the service to update the friend's status
         FriendDto updatedFriendDto = friendService.updateFriendStatus(id);
-
-        // If no friend found (status could not be updated), return 404 Not Found
         if (updatedFriendDto == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        // Return the updated Friend DTO with 200 OK
         return ResponseEntity.ok(updatedFriendDto);
     }
 
@@ -60,25 +55,19 @@ public class FriendController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
-
     //them bạn bè
-    @PostMapping("/add/{user1}/{user2}")
+    @PostMapping("/add-friend/{user1}/{user2}")
     public ResponseEntity<String> addFriend(@PathVariable String user1, @PathVariable String user2) {
         try {
             // Call the service to add the friend
             String message = friendService.addFriend(user1, user2);
-            return ResponseEntity.ok(message);  // Respond with 200 OK and success message
+            return ResponseEntity.ok(message);
         } catch (IllegalArgumentException e) {
-            // Handle invalid username or duplicate request
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            // Handle unexpected errors
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error adding friend: " + e.getMessage());
         }
     }
-
-
     //xóa bạn bè
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFriendRequest(@PathVariable Integer id) {

@@ -14,4 +14,5 @@ public class FriendDto implements Serializable {
     Boolean status;
     String friendName;
     String friendUserName;
+    String friendAvatar;
 }

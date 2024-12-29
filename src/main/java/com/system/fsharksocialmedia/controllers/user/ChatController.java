@@ -56,9 +56,10 @@ public class ChatController {
     }
 
     // xoá tin nhắn
-    @DeleteMapping("/deleteMessages")
+    @DeleteMapping("/api/deleteMessages")
     public String deleteMessages(@RequestParam String user1, @RequestParam String user2, @RequestParam String currentUser) {
         chatService.deleteMessagesForUser(user1, user2, currentUser);
+        System.out.println("xoas ");
         return "Messages deleted successfully for " + currentUser;
     }
     // Xử lý khi người dùng tham gia

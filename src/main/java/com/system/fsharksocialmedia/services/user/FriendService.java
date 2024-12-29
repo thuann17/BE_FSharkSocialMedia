@@ -46,7 +46,6 @@ public class FriendService {
         if (username == null || username.isEmpty()) {
             return List.of(); // Return an empty list if username is invalid
         }
-        // Call SQL procedure to get the list of friends
         List<Object[]> results = friendRepository.findFriendNamesByUsername(username);
 
         // Map the results to a list of FriendDto
@@ -61,8 +60,9 @@ public class FriendService {
                 friendDto.setCreatedate(timestamp.toInstant()); // Convert Timestamp to Instant
             }
             friendDto.setStatus((Boolean) result[4]); // status
-            friendDto.setFriendName((String) result[5]); // friend_name from CASE
-//            friendDto.setFriendUserName((String) result[5]);
+            friendDto.setFriendUserName((String) result[5]);
+            friendDto.setFriendName((String) result[6]);
+            friendDto.setFriendAvatar((String) result[7]);
             return friendDto;
         }).collect(Collectors.toList());
     }
@@ -71,13 +71,9 @@ public class FriendService {
     // Lấy danh sách người follow theo userTarget
     public List<FriendDto> getFollowers(String username) {
         if (username == null || username.isEmpty()) {
-            return List.of(); // Return empty list if username is invalid
+            return List.of();
         }
-
-        // Call repository to fetch followers based on the stored procedure
         List<Object[]> results = friendRepository.findFollowersByUsername(username);
-
-        // Map the results to a list of FriendDto with null checks
         return results.stream().map(result -> {
             FriendDto friendDto = new FriendDto();
 
@@ -87,19 +83,15 @@ public class FriendService {
             String userTargetUsername = (String) result[1];
             User userTarget = userRepository.findById(userTargetUsername).orElse(null);
             friendDto.setUserTarget(userTarget != null ? userService.toDto(userTarget) : null);
-
-            // Convert userSrc to UserDto, handling potential null
             String userSrcUsername = (String) result[2];
             User userSrc = userRepository.findById(userSrcUsername).orElse(null);
             friendDto.setUserSrc(userSrc != null ? userService.toDto(userSrc) : null);
 
             friendDto.setCreatedate(((Timestamp) result[3]).toInstant());
             friendDto.setStatus((Boolean) result[4]);
-
-            // Additional fields with appropriate casting
             friendDto.setFriendUserName((String) result[5]);
             friendDto.setFriendName((String) result[6]);
-
+            friendDto.setFriendAvatar((String) result[7]);
             return friendDto;
         }).collect(Collectors.toList());
     }
@@ -114,53 +106,38 @@ public class FriendService {
 
     // Method to add a friend
     public String addFriend(String username1, String username2) {
-        // Retrieve both users by username
         Optional<User> user1Optional = userRepository.findById(username1);
         Optional<User> user2Optional = userRepository.findById(username2);
-
         if (!user1Optional.isPresent() || !user2Optional.isPresent()) {
             throw new IllegalArgumentException("User IDs cannot be null or invalid");
         }
-
         User user1 = user1Optional.get();
         User user2 = user2Optional.get();
 
-        // Check if the users are already friends or have sent a friend request to avoid duplicate requests
         if (friendRepository.existsByUserSrcAndUserTarget(user1, user2)) {
             throw new IllegalArgumentException("Friend request already sent or users are already friends.");
         }
 
-        // Create a new friend request
         Friend friendRequest = new Friend();
         friendRequest.setUserTarget(user1);
         friendRequest.setUserSrc(user2);
-        friendRequest.setStatus(false);  // Friend request is pending
+        friendRequest.setStatus(false);
         friendRequest.setCreatedate(Instant.now());
-
-        // Save the friend request in the repository
         friendRepository.save(friendRequest);
-
         return "Friend request sent successfully!";
     }
 
     //chấp nhận yê cầu kết bạn
     public FriendDto updateFriendStatus(Integer friendId) {
-        // Find the Friend entity by its ID
         Friend friend = friendRepository.findById(friendId).orElse(null);
-
-        // If the Friend entity doesn't exist, return null or handle it accordingly
         if (friend == null) {
             return null;
         }
-
-        // Check if the current status is false, then update to true
         if (Boolean.FALSE.equals(friend.getStatus())) {
-            friend.setStatus(true); // Set the status to true
-            friend = friendRepository.save(friend); // Save the updated friend entity to the database
+            friend.setStatus(true);
+            friend = friendRepository.save(friend);
         }
-
-        // Convert the updated Friend entity to a DTO and return it
-        return toDto(friend); // Assuming `toDto` is a method that converts Friend to FriendDto
+        return toDto(friend);
     }
 
     // Method to delete a friend by ID
