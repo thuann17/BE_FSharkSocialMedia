@@ -51,7 +51,6 @@ public class AdminPostService {
     private PostDto convertToDto(Post post) {
         long commentCount = postRepository.countCmtByPost(post.getId());
         long likeCount = postRepository.countLikeByPost(post.getId());
-
         PostDto postDto = new PostDto();
 
         postDto.setId(post.getId());
@@ -66,21 +65,5 @@ public class AdminPostService {
             postDto.setUsername(userDto);
         }
         return postDto;
-    }
-
-    // Convert DTO to entity
-    public Post convertToEntity(PostDto dto) {
-        if (dto == null) return null;
-        Post post = new Post();
-        post.setId(dto.getId());
-        post.setContent(dto.getContent());
-        post.setCreatedate(dto.getCreatedate());
-        return post;
-    }
-
-    public List<PostDto> convertToDTOList(List<Post> posts) {
-        return posts.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
     }
 }

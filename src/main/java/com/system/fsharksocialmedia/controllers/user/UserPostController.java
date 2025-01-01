@@ -30,12 +30,16 @@ public class UserPostController {
     @Autowired
     private UserPostService uPostService;
 
+    @GetMapping("/getPostByListFriends")
+    public ResponseEntity<List<PostDto>> getPost(@RequestParam String username) {
+        return ResponseEntity.ok().body(uPostService.getPostsByFriends(username));
+    }
+
     @GetMapping("/{username}")
     public ResponseEntity<?> getPostsWithUserDetails(@PathVariable String username) {
         try {
             List<PostDto> posts = postService.getPostsWithUserDetails(username);
             if (posts.isEmpty()) {
-
                 return ResponseEntity.noContent().build();
             }
             return ResponseEntity.ok(posts);
@@ -65,7 +69,6 @@ public class UserPostController {
     @GetMapping("/count/{postId}")
     public ResponseEntity<?> getCountLikesForPost(@PathVariable Integer postId) {
         try {
-            // Gọi trực tiếp postId để lấy số lượt thích
             Long likeCount = uPostService.countLikesForPost(postId);
             return ResponseEntity.ok(likeCount);
         } catch (Exception e) {
@@ -79,7 +82,6 @@ public class UserPostController {
         try {
             // Gọi service để thêm like
             LikepostDto likepostDto = uPostService.likePost(username, postId);
-
             return ResponseEntity.ok(likepostDto);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -94,12 +96,12 @@ public class UserPostController {
         return ResponseEntity.ok(hasLiked);
     }
 
-    @DeleteMapping("/likes/{postId}/{username}")
-    public ResponseEntity<Map<String, String>> removeLike(@PathVariable Integer postId, @PathVariable String username) {
+    @DeleteMapping("/likes/{postId}")
+    public ResponseEntity<Map<String, String>> removeLike(@PathVariable Integer postId, @RequestParam String username) {
         try {
             String message = uPostService.removeLike(postId, username);
             Map<String, String> response = new HashMap<>();
-            response.put("message", message);  // Return the message as part of a JSON object
+            response.put("message", message);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

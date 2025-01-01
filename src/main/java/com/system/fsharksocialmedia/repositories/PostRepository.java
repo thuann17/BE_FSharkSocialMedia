@@ -27,4 +27,5 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Procedure(procedureName = "GetPostsWithUserDetails")
     List<Object[]> getPostsWithUserDetails(@Param("inputUsername") String username);
 
+    List<Post> findAllByUsernameIn(List<User> usernames);
 }
