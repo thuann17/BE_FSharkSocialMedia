@@ -188,7 +188,6 @@ public class UserPostService {
                     .anyMatch(like -> like.getUsername().getUsername().equals(currentUser.getUsername()));
             postDto.setLikedByUser(isLikedByUser);
         }
-
         return postDto;
     }
 

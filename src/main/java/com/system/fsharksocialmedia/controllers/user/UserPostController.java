@@ -90,12 +90,6 @@ public class UserPostController {
         }
     }
 
-    @GetMapping("/has-liked/{postId}")
-    public ResponseEntity<Boolean> hasLikedPost(@PathVariable Integer postId, @RequestParam String username) {
-        boolean hasLiked = uPostService.hasUserLikedPost(username, postId);
-        return ResponseEntity.ok(hasLiked);
-    }
-
     @DeleteMapping("/likes/{postId}")
     public ResponseEntity<Map<String, String>> removeLike(@PathVariable Integer postId, @RequestParam String username) {
         try {
