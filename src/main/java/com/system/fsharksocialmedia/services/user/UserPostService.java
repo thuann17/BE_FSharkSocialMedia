@@ -2,6 +2,7 @@ package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
+import com.system.fsharksocialmedia.models.CommentModel;
 import com.system.fsharksocialmedia.models.PostModel;
 import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,19 @@ public class UserPostService {
         return postRepository.countCmtByPost(postId);
     }
 
+    public CommentDto addComment(Integer postId, String username, CommentModel commentModel) {
+        Post post = postRepository.findById(postId).orElse(null);
+        User u = userRepository.findByUsername(username).orElse(null);
+        Comment comment = new Comment();
+        comment.setPost(post);
+        comment.setContent(commentModel.getContent());
+        comment.setUsername(u);
+        comment.setCreatedate(Instant.now());
+        comment.setPost(post);
+        comment.setImage(commentModel.getImage());
+        return convertToCommentDto(commentRepository.save(comment));
+    }
+
     // Like a post
     @Transactional
     public LikepostDto likePost(String username, Integer postId) {
@@ -158,7 +172,6 @@ public class UserPostService {
         postDto.setCreatedate(post.getCreatedate());
         postDto.setContent(post.getContent());
         postDto.setStatus(post.getStatus());
-
         if (post.getUsername() != null) {
             postDto.setUsername(convertToUserDto(post.getUsername()));
         }
@@ -188,6 +201,7 @@ public class UserPostService {
                     .anyMatch(like -> like.getUsername().getUsername().equals(currentUser.getUsername()));
             postDto.setLikedByUser(isLikedByUser);
         }
+
         return postDto;
     }
 
@@ -210,11 +224,11 @@ public class UserPostService {
             commentDto.setUsername(convertToUserDto(comment.getUsername()));
         }
 
-        if (comment.getPost() != null) {
-            PostDto postDto = new PostDto();
-            postDto.setId(comment.getPost().getId());
-            commentDto.setPost(postDto);
-        }
+//        if (comment.getPost() != null) {
+//            PostDto postDto = new PostDto();
+//            postDto.setId(comment.getPost().getId());
+//            commentDto.setPost(postDto);
+//        }
 
         return commentDto;
     }
@@ -223,9 +237,9 @@ public class UserPostService {
         LikepostDto likepostDto = new LikepostDto();
         likepostDto.setId(likepost.getId());
 
-        if (likepost.getUsername() != null) {
-            likepostDto.setUsername(convertToUserDto(likepost.getUsername()));
-        }
+//        if (likepost.getUsername() != null) {
+//            likepostDto.setUsername(convertToUserDto(likepost.getUsername()));
+//        }
 
         if (likepost.getPost() != null) {
             PostDto postDto = new PostDto();
@@ -249,9 +263,9 @@ public class UserPostService {
         notificationDto.setContent(notification.getContent());
         notificationDto.setCreatedate(notification.getCreatedate());
 
-        if (notification.getUsername() != null) {
-            notificationDto.setUsername(convertToUserDto(notification.getUsername()));
-        }
+//        if (notification.getUsername() != null) {
+//            notificationDto.setUsername(convertToUserDto(notification.getUsername()));
+//        }
 
         return notificationDto;
     }
@@ -266,9 +280,9 @@ public class UserPostService {
             shareDto.setPost(postDto);
         }
 
-        if (share.getUsername() != null) {
-            shareDto.setUsername(convertToUserDto(share.getUsername()));
-        }
+//        if (share.getUsername() != null) {
+//            shareDto.setUsername(convertToUserDto(share.getUsername()));
+//        }
 
         return shareDto;
     }

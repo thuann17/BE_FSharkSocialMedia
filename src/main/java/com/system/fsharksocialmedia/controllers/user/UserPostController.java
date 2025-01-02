@@ -6,6 +6,7 @@ import com.system.fsharksocialmedia.dtos.LikepostDto;
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.entities.User;
+import com.system.fsharksocialmedia.models.CommentModel;
 import com.system.fsharksocialmedia.models.PostModel;
 import com.system.fsharksocialmedia.services.user.UserPostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +91,12 @@ public class UserPostController {
         }
     }
 
+    @GetMapping("/has-liked/{postId}")
+    public ResponseEntity<Boolean> hasLikedPost(@PathVariable Integer postId, @RequestParam String username) {
+        boolean hasLiked = uPostService.hasUserLikedPost(username, postId);
+        return ResponseEntity.ok(hasLiked);
+    }
+
     @DeleteMapping("/likes/{postId}")
     public ResponseEntity<Map<String, String>> removeLike(@PathVariable Integer postId, @RequestParam String username) {
         try {
@@ -105,7 +112,7 @@ public class UserPostController {
         }
     }
 
-    @GetMapping("/cmt/{postId}")
+    @GetMapping("/comments/{postId}")
     public ResponseEntity<List<CommentDto>> getCommentsByPostId(@PathVariable Integer postId) {
         List<CommentDto> comments = uPostService.getCommentsByPostId(postId);
         if (comments.isEmpty()) {
@@ -113,6 +120,17 @@ public class UserPostController {
         }
         return ResponseEntity.ok(comments);
     }
+
+    @PostMapping("/comments/{postId}")
+    public ResponseEntity<?> commentPost(@PathVariable Integer postId, @RequestParam String username, @RequestBody CommentModel model) {
+        try {
+            CommentDto commentDto = uPostService.addComment(postId, username, model);
+            return ResponseEntity.ok(commentDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
+        }
+    }
+
 
     @GetMapping("/likecomment/{commentId}")
     public ResponseEntity<Integer> getLikesByCommentId(@PathVariable Integer commentId) {
