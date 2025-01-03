@@ -5,8 +5,10 @@ import com.system.fsharksocialmedia.repositories.UserRepository;
 import com.system.fsharksocialmedia.services.admin.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -30,4 +32,9 @@ public class AboutController {
             return ResponseEntity.notFound().build(); // Return 404 if not found
         }
     }
+    @Transactional(readOnly = true)
+    public List<User> getUsersWithoutFriends(String username) {
+        return userRepository.findUsersWithoutFriends(username);
+    }
+
 }
