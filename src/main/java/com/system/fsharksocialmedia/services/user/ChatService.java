@@ -4,8 +4,10 @@ import com.system.fsharksocialmedia.documents.MessageDto;
 import com.system.fsharksocialmedia.documents.MessageModel;
 import com.system.fsharksocialmedia.reposmongo.MessageMongoReps;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,45 +18,61 @@ public class ChatService {
     @Autowired
     private MessageMongoReps messageMongoReps;
 
-    public List<MessageDto> getMessagesBetweenUsers(String user1, String user2) {
-        List<MessageModel> messages = messageMongoReps.findBySenderAndReceiverOrReceiverAndSender(user1, user2, user2, user1);
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
+    // Retrieve messages between two users
+    public List<MessageDto> getMessagesBetweenUsers(String user1, String user2) {
+        List<MessageModel> messages = messageMongoReps.findMessagesForUsers(user1, user2);
+        System.out.println(messages);
         return messages.stream()
-                .filter(message -> {
-                    if (message.getSender().equals(user1)) {
-                        return !message.isDeletedBySender();
-                    } else {
-                        return !message.isDeletedByReceiver();
-                    }
-                })
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    public void deleteMessagesForUser(String user1, String user2, String currentUser) {
-        // Lấy danh sách tin nhắn giữa hai người dùng
-        List<MessageModel> messages = messageMongoReps.findBySenderAndReceiverOrReceiverAndSender(user1, user2, user2, user1);
-        List<MessageModel> updatedMessages = new ArrayList<>();
-        for (MessageModel message : messages) {
-            if (user1.equals(currentUser) && message.getSender().equals(user1) && message.getReceiver().equals(user2)) {
-                if (!message.isDeletedBySender()) {
-                    message.setDeletedBySender(true);
-                    System.out.println("Xóa thành công tin nhắn của sender: " + message.isDeletedBySender());
-                    updatedMessages.add(message);
-                }
+    public MessageModel saveMessage(MessageModel chatMessage) {
+        try {
+            if (chatMessage.getUrlImage() == null) {
+                chatMessage.setUrlImage("");
+            } else {
+                chatMessage.setUrlImage(chatMessage.getUrlImage());
             }
-            else if (user2.equals(currentUser) && message.getSender().equals(user2) && message.getReceiver().equals(user1)) {
-                if (!message.isDeletedByReceiver()) {
-                    message.setDeletedByReceiver(true);
-                    System.out.println("Xóa thành công tin nhắn của receiver: " + message.isDeletedByReceiver());
-                    updatedMessages.add(message);
-                }
-            }
+            chatMessage.setTime(Instant.now());
+            chatMessage.setDeletedBySender(false);
+            chatMessage.setDeletedByReceiver(false);
+            chatMessage.setStatus(false);
+            messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getSender(), chatMessage);
+            messageMongoReps.save(chatMessage);
+        } catch (Exception e) {
+            System.err.println("Error saving message to DB: " + e.getMessage());
+            e.printStackTrace();
         }
-        if (!updatedMessages.isEmpty()) {
-            messageMongoReps.saveAll(updatedMessages);
+        return chatMessage;
+    }
+
+    public void sendReply(MessageModel model, String parentMessageId) {
+        MessageModel chatMessage = messageMongoReps.findById(model.getParentMessageId()).orElse(null);
+        chatMessage.setParentMessageId(parentMessageId);
+        try {
+            if (chatMessage.getUrlImage() == null) {
+                chatMessage.setUrlImage("");
+            } else {
+                chatMessage.setUrlImage(chatMessage.getUrlImage());
+            }
+            chatMessage.setTime(Instant.now());
+            chatMessage.setDeletedBySender(false);
+            chatMessage.setDeletedByReceiver(false);
+            chatMessage.setStatus(false);
+
+            messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getSender(), chatMessage);
+            messageMongoReps.save(chatMessage);
+        } catch (Exception e) {
+            System.err.println("Error saving message to DB: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+    // Convert MessageModel to MessageDto
     public MessageDto convertToDto(MessageModel messageMongo) {
         MessageDto messageDto = new MessageDto();
         messageDto.setSender(messageMongo.getSender());

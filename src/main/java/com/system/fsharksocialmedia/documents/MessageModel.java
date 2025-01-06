@@ -14,10 +14,10 @@ public class MessageModel {
     private String content;
     private Instant time;
     private String receiver;
-//    private boolean isRead;
-//    private boolean isDelivered;
-//    private boolean isSeen;
-    private boolean isDeletedBySender =false;
-    private boolean isDeletedByReceiver =false;
+    private String parentMessageId;
+    String urlImage;
+    private boolean isStatus = true;
+    private boolean isDeletedBySender = false;
+    private boolean isDeletedByReceiver = false;
 
 }

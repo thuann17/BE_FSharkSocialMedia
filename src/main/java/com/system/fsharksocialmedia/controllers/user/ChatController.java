@@ -38,15 +38,15 @@ public class ChatController {
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     public MessageModel sendMessage(@Payload MessageModel chatMessage) {
-        try {
-            chatMessage.setTime(Instant.now());
-            messageMongoReps.save(chatMessage); // Lưu tin nhắn vào DB
-            System.out.println("Luu tin nhan vao db");
-        } catch (Exception e) {
-            System.err.println("Error saving message to DB: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return chatMessage;
+        return chatService.saveMessage(chatMessage);
+    }
+
+    @PostMapping("/reply")
+    public ResponseEntity<?> sendReply(@RequestBody MessageModel message, @RequestParam String parentMessageId) {
+        // Lưu thông tin tin nhắn trả lời vào cơ sở dữ liệu
+        message.setParentMessageId(parentMessageId); // Gắn parentMessageId vào tin nhắn trả lời
+        chatService.sendReply(message, parentMessageId); // Xử lý gửi tin nhắn trả lời
+        return ResponseEntity.ok().build();
     }
 
     // check soạn tin
@@ -55,18 +55,31 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/typing/" + chatMessage.getReceiver(), chatMessage);
     }
 
-    // xoá tin nhắn
-    @DeleteMapping("/api/deleteMessages")
-    public String deleteMessages(@RequestParam String user1, @RequestParam String user2, @RequestParam String currentUser) {
-        chatService.deleteMessagesForUser(user1, user2, currentUser);
-        System.out.println("xoas ");
-        return "Messages deleted successfully for " + currentUser;
+    @MessageMapping("/chat.readMessage")
+    public void readMessage(MessageModel chatMessage) {
+        try {
+            chatMessage.setStatus(true);
+            messageMongoReps.save(chatMessage);
+            System.out.println("Đ xem");
+            messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getReceiver(), chatMessage);
+        } catch (Exception e) {
+            System.err.println("Error updating message status to 'read': " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
+    // xoá tin nhắn
+    //    @DeleteMapping("/api/deleteMessages")
+    //    public String deleteMessages(@RequestParam String user1, @RequestParam String user2, @RequestParam String currentUser) {
+    //        chatService.deleteMessagesForUser(user1, user2, currentUser);
+    //        System.out.println("xoas ");
+    //        return "Messages deleted successfully for " + currentUser;
+    //    }
     // Xử lý khi người dùng tham gia
-//    @MessageMapping("/chat.addUser")
-//    @SendTo("/topic/public")
-//    public MessageModel addUser(@Payload MessageModel chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-//        return chatMessage;
-//    }
+    //    @MessageMapping("/chat.addUser")
+    //    @SendTo("/topic/public")
+    //    public MessageModel addUser(@Payload MessageModel chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+    //        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+    //        return chatMessage;
+    //    }
 }
