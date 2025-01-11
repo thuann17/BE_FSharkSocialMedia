@@ -14,6 +14,7 @@ public class UserInfoDetails implements UserDetails {
     private String password;
     private List<GrantedAuthority> authorities;
     private Integer roleId;
+    private Boolean isActive;  // Store active status
 
     public UserInfoDetails(User user) {
         this.name = user.getUsername();
@@ -22,7 +23,9 @@ public class UserInfoDetails implements UserDetails {
         this.authorities = user.getRoles() != null ?
                 List.of(new SimpleGrantedAuthority(user.getRoles().getRole())) :
                 List.of(); // Ensure authorities are based on role
+        this.isActive = user.getActive();  // Get account active status
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -40,21 +43,21 @@ public class UserInfoDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true;  // You can implement expiration logic if needed
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isActive != null && isActive;  // Account is locked if 'active' is false
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true;  // You can implement expiration logic if needed
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return true;  // You can implement enabled logic if needed
     }
 }

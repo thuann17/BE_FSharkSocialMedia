@@ -11,4 +11,6 @@ public class MessageDto implements Serializable {
     private String receiver;
     private String content;
     private Instant time;
+    private String urlImage;
+    private boolean isReal;
 }

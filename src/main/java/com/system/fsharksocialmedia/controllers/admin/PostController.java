@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/api/post")
+@RequestMapping("/api/admin/post")
 public class PostController {
     @Autowired
     private AdminPostService adminPostService;
@@ -19,10 +19,20 @@ public class PostController {
     public ResponseEntity<Page<PostDto>> getPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "7") int size,
-            @RequestParam(required = false) String search) {
-        Page<PostDto> posts = adminPostService.getPost(page, size, search);
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status) {
+        Boolean statusBoolean = null;
+        if (status != null) {
+            if ("true".equalsIgnoreCase(status)) {
+                statusBoolean = true;
+            } else if ("false".equalsIgnoreCase(status)) {
+                statusBoolean = false;
+            }
+        }
+        Page<PostDto> posts = adminPostService.getPost(page, size, search, statusBoolean);
         return ResponseEntity.ok(posts);
     }
+
 
     @GetMapping("/{postId}")
     public ResponseEntity<PostDto> getPost(@PathVariable Integer postId) {

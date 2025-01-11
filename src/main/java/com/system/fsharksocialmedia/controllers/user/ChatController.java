@@ -41,13 +41,13 @@ public class ChatController {
         return chatService.saveMessage(chatMessage);
     }
 
-    @PostMapping("/reply")
-    public ResponseEntity<?> sendReply(@RequestBody MessageModel message, @RequestParam String parentMessageId) {
-        // Lưu thông tin tin nhắn trả lời vào cơ sở dữ liệu
-        message.setParentMessageId(parentMessageId); // Gắn parentMessageId vào tin nhắn trả lời
-        chatService.sendReply(message, parentMessageId); // Xử lý gửi tin nhắn trả lời
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/reply")
+//    public ResponseEntity<?> sendReply(@RequestBody MessageModel message, @RequestParam String parentMessageId) {
+//        // Lưu thông tin tin nhắn trả lời vào cơ sở dữ liệu
+//        message.setParentMessageId(parentMessageId); // Gắn parentMessageId vào tin nhắn trả lời
+//        chatService.sendReply(message, parentMessageId); // Xử lý gửi tin nhắn trả lời
+//        return ResponseEntity.ok().build();
+//    }
 
     // check soạn tin
     @MessageMapping("/chat.typing")
@@ -56,16 +56,29 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.readMessage")
-    public void readMessage(MessageModel chatMessage) {
+    public void readMessage(@Payload MessageModel chatMessage) {
         try {
-            chatMessage.setStatus(true);
-            messageMongoReps.save(chatMessage);
-            System.out.println("Đ xem");
-            messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getReceiver(), chatMessage);
+            // Cập nhật trạng thái tin nhắn đã xem
+            MessageModel message = messageMongoReps.findById(String.valueOf(chatMessage.getId())).orElse(null);
+            if (message != null) {
+                message.setReal(true); // Đánh dấu đã xem
+                messageMongoReps.save(message);
+
+                // Gửi thông báo qua WebSocket tới người gửi
+                messagingTemplate.convertAndSend(
+                        "/topic/readStatus/" + message.getSender(),
+                        message
+                );
+            }
         } catch (Exception e) {
             System.err.println("Error updating message status to 'read': " + e.getMessage());
-            e.printStackTrace();
         }
+    }
+// api tin nhắn chưa đọc
+    @GetMapping("/api/user/chat/unreadMessages")
+    public ResponseEntity<List<MessageDto>> getUnreadMessages(@RequestParam String receiver) {
+        List<MessageDto> unreadMessages = chatService.getUnreadMessages(receiver);
+        return ResponseEntity.ok(unreadMessages);
     }
 
     // xoá tin nhắn

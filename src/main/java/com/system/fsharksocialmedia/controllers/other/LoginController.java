@@ -5,6 +5,7 @@ import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.models.LoginModel;
 import com.system.fsharksocialmedia.models.UserModel;
 import com.system.fsharksocialmedia.services.other.JwtService;
+import com.system.fsharksocialmedia.services.other.UserInfoDetails;
 import com.system.fsharksocialmedia.services.other.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,11 +43,16 @@ public class LoginController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-
+    @PostMapping("/register-admin")
+    public ResponseEntity<UserDto> addNewAdmin(@RequestBody UserModel model) {
+        UserDto createdUser = userInfoService.addAdmin(model);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    }
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> authenticateAndGetToken(@RequestBody LoginModel loginModel) {
         Map<String, String> response = new HashMap<>();
         try {
+
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginModel.getUsername(), loginModel.getPassword()));
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(loginModel.getUsername());

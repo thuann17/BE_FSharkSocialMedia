@@ -28,4 +28,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Object[]> getPostsWithUserDetails(@Param("inputUsername") String username);
 
     List<Post> findAllByUsernameIn(List<User> usernames);
+    Page<Post> findByStatus(Boolean status, Pageable pageable);
+    Page<Post> findByContentContainingIgnoreCaseAndStatus(String search, Boolean status, Pageable pageable);
+
 }

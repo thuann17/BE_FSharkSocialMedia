@@ -33,14 +33,14 @@ public class ChatService {
     public MessageModel saveMessage(MessageModel chatMessage) {
         try {
             if (chatMessage.getUrlImage() == null) {
-                chatMessage.setUrlImage("");
+                chatMessage.setUrlImage(null);
             } else {
                 chatMessage.setUrlImage(chatMessage.getUrlImage());
             }
             chatMessage.setTime(Instant.now());
             chatMessage.setDeletedBySender(false);
             chatMessage.setDeletedByReceiver(false);
-            chatMessage.setStatus(false);
+            chatMessage.setReal(false);
             messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getSender(), chatMessage);
             messageMongoReps.save(chatMessage);
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class ChatService {
             chatMessage.setTime(Instant.now());
             chatMessage.setDeletedBySender(false);
             chatMessage.setDeletedByReceiver(false);
-            chatMessage.setStatus(false);
+            chatMessage.setReal(false);
 
             messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getSender(), chatMessage);
             messageMongoReps.save(chatMessage);
@@ -72,6 +72,12 @@ public class ChatService {
         }
     }
 
+    public List<MessageDto> getUnreadMessages(String receiver) {
+        List<MessageModel> unreadMessages = messageMongoReps.findByReceiverAndReal(receiver, false);
+        return unreadMessages.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+
     // Convert MessageModel to MessageDto
     public MessageDto convertToDto(MessageModel messageMongo) {
         MessageDto messageDto = new MessageDto();
@@ -79,6 +85,8 @@ public class ChatService {
         messageDto.setReceiver(messageMongo.getReceiver());
         messageDto.setContent(messageMongo.getContent());
         messageDto.setTime(messageMongo.getTime());
+        messageDto.setUrlImage(messageMongo.getUrlImage());
+        messageDto.setReal(messageMongo.isReal());
         return messageDto;
     }
 }

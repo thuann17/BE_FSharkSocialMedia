@@ -14,5 +14,7 @@ public interface MessageMongoReps extends MongoRepository<MessageModel, String> 
             "{ 'isDeletedBySender': false, 'isDeletedByReceiver': false } " +
             "] }")
     List<MessageModel> findMessagesForUsers(String user1, String user2);
+    List<MessageModel> findByReceiverAndReal(String receiver, boolean real);
+
 }
 
