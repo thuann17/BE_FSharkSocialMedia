@@ -53,9 +53,9 @@ public class SecurityConfig {
             configuration.setAllowCredentials(true);
             return configuration;
         })).authorizeHttpRequests(auth -> auth
-                .requestMatchers( "/ws/**", "/**").permitAll()
-                .requestMatchers("/api/**").authenticated()
-                .requestMatchers("/api/**").hasAuthority("ADMIN")
+//                .requestMatchers( "/ws/**", "/**","/**/**/**").permitAll()
+//                .requestMatchers("/api/**").authenticated()
+//                .requestMatchers("/api/**").hasAuthority("ADMIN")
                 .anyRequest().permitAll()).sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authenticationProvider(authenticationProvider()).exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler)).addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
 

@@ -82,13 +82,10 @@ public class FriendController {
     //láy danh sách gơị ý kb
     @GetMapping("/without-friends/{username}")
     public ResponseEntity<List<UserDto>> getUsersWithoutFriends(@PathVariable("username") String username) {
-        List<User> usersWithoutFriends = friendService.getUsersWithoutFriends(username);
+        // Get the list of users without friends
+        List<UserDto> usersWithoutFriends = friendService.getUsersWithoutFriends(username);
 
-        // Map User entities to UserDto
-        List<UserDto> userDtos = usersWithoutFriends.stream()
-                .map(user -> userService.toDto(user)) // Use a mapping method
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(userDtos);
+        // Return the list as the response
+        return ResponseEntity.ok(usersWithoutFriends);
     }
 }

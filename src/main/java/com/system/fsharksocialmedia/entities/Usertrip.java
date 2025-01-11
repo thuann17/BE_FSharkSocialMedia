@@ -27,8 +27,5 @@ public class Usertrip {
     @JoinColumn(name = "ROLE")
     private Triprole role;
 
-    @Size(max = 50)
-    @Column(name = "STATUS", length = 50)
-    private String status;
 
 }

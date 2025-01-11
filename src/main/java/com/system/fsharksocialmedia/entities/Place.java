@@ -35,7 +35,7 @@ public class Place {
 
     @Size(max = 1000)
     @Nationalized
-    @Column(name = "DESCRIPTION", length = 1000)
+    @Column(name = "DESCRIPTION", length = 200)
     private String description;
 
     @OneToMany(mappedBy = "placeid")

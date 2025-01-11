@@ -1,6 +1,8 @@
 package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.FriendDto;
+import com.system.fsharksocialmedia.dtos.ImageDto;
+import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.Friend;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.repositories.FriendRepository;
@@ -99,8 +101,26 @@ public class FriendService {
 
     //lây goi y ket ban
     @Transactional(readOnly = true)
-    public List<User> getUsersWithoutFriends(String username) {
-        return userRepository.findUsersWithoutFriends(username);
+    public List<UserDto> getUsersWithoutFriends(String username) {
+        if (username == null || username.isEmpty()) {
+            return List.of();
+        }
+        List<Object[]> results = friendRepository.findUsersWithoutFriends(username);
+        return results.stream().map(result -> {
+            UserDto userDto = new UserDto();
+
+            userDto.setUsername((String) result[0]);
+            userDto.setFirstname((String) result[7]);
+            userDto.setLastname((String) result[6]);
+            ImageDto imageDto = new ImageDto();
+            imageDto.setAvatarrurl(result[14] != null ? result[14].toString() : null);  // Avatar URL (ensure it's a String)
+
+            // Set the image information to the userDto
+            userDto.setImages(List.of(imageDto));
+
+            return userDto;
+        }).collect(Collectors.toList());
+
     }
 
 

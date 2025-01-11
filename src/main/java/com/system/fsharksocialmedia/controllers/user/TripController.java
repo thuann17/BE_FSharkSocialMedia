@@ -1,10 +1,14 @@
 package com.system.fsharksocialmedia.controllers.user;
 
 import com.system.fsharksocialmedia.dtos.PlacetripDto;
+import com.system.fsharksocialmedia.dtos.TripDetailsDto;
 import com.system.fsharksocialmedia.dtos.TripDto;
 import com.system.fsharksocialmedia.models.TripModel;
 import com.system.fsharksocialmedia.services.user.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -16,9 +20,16 @@ import java.util.List;
 public class TripController {
     @Autowired
     private TripService tripService;
-    @PostMapping("/create")
-    public TripDto createTrip(@RequestBody TripModel tripModel, @RequestParam String username) {
-        return tripService.createTrip(tripModel, username);
+
+    //1. Thêm chuyến đi
+    @PostMapping(value = "/addTripDetails", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> addTripDetails(@RequestBody TripModel tripDetailsWrapperDto) {
+        try {
+            tripService.addTripDetails(tripDetailsWrapperDto);
+            return ResponseEntity.ok("Trip details added successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error adding trip details: " + e.getMessage());
+        }
     }
     // 2. Gửi yêu cầu tham gia chuyến đi
     @PostMapping("/request-join")
@@ -39,14 +50,24 @@ public class TripController {
     }
 
     // 5. Lấy danh sách chuyến đi của người dùng
-    @GetMapping("/user-trips")
-    public List<TripDto> getTripsByUser(@RequestParam String username) {
-        return tripService.getTripsByUser(username);
-    }
+//    @GetMapping("/details/{username}")
+//    public ResponseEntity<TripDetailsDto> getTripDetailsByUsername(@PathVariable String username) {
+//        try {
+//            TripDetailsDto tripDetailsDto = tripService.getTripDetailsByUsername(username);
+//            System.out.println("hello");
+//            return new ResponseEntity<>(tripDetailsDto, HttpStatus.OK);
+//        } catch (RuntimeException e) {
+//            System.out.println("lỗi"+e.getMessage());
+//
+//            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//        }
+//    }
 
     // 6. Đánh dấu chuyến đi là hoàn thành
     @PostMapping("/complete")
     public TripDto completeTrip(@RequestParam Integer tripId) {
         return tripService.completeTrip(tripId);
     }
+
+
 }

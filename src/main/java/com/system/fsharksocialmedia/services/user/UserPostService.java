@@ -34,28 +34,36 @@ public class UserPostService {
     @Autowired
     private FriendRepository friendRepository;
 
+    @Autowired
+    PostimageRepository postImageRepository;
+
     public List<PostDto> getPostsByFriends(String username) {
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
 
+        // Lấy danh sách bạn bè
         List<User> friends = friendRepository.findAllByUserSrcOrUserTargetAndStatus(currentUser, currentUser, true)
                 .stream()
                 .map(friend -> friend.getUserSrc().equals(currentUser) ? friend.getUserTarget() : friend.getUserSrc())
                 .collect(Collectors.toList());
 
-        if (friends.isEmpty()) {
-            throw new RuntimeException("Bạn không có bài viết nào từ bạn bè.");
-        }
+        // Thêm chính người dùng vào danh sách
+        friends.add(currentUser);
 
-        List<Post> posts = postRepository.findAllByUsernameIn(friends);
+        // Lấy tất cả bài viết của người dùng và bạn bè, sắp xếp theo ngày tạo (mới nhất -> cũ nhất)
+        List<Post> posts = postRepository.findAllByUsernameInOrderByCreatedateDesc(friends);
+
         return posts.stream()
                 .map(post -> convertToDto(post, currentUser))
                 .collect(Collectors.toList());
     }
 
     // Add a new post
-    public PostDto addPost(PostModel postModel) {
+    public PostDto addPost(String username, PostModel postModel) {
         Post post = new Post();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+        post.setUsername(currentUser);
         post.setContent(postModel.getContent());
         post.setStatus(false);
         post.setCreatedate(Instant.now());
@@ -165,6 +173,8 @@ public class UserPostService {
     public PostDto convertToDto(Post post, User currentUser) {
         long commentCount = postRepository.countCmtByPost(post.getId());
         long likeCount = postRepository.countLikeByPost(post.getId());
+
+        // Initialize PostDto
         PostDto postDto = new PostDto();
         postDto.setCountComment(commentCount);
         postDto.setCountLike(likeCount);
@@ -172,9 +182,25 @@ public class UserPostService {
         postDto.setCreatedate(post.getCreatedate());
         postDto.setContent(post.getContent());
         postDto.setStatus(post.getStatus());
+
+        // Convert UserDto
+        UserDto userDto = new UserDto();
         if (post.getUsername() != null) {
-            postDto.setUsername(convertToUserDto(post.getUsername()));
+            userDto.setUsername(post.getUsername().getUsername());
+            userDto.setFirstname(post.getUsername().getFirstname());
+            userDto.setLastname(post.getUsername().getLastname());
+
+            // Convert User images (use Set<ImageDto>)
+            if (post.getUsername().getImages() != null) {
+                List<ImageDto> imageDtos = post.getUsername().getImages().stream()
+                        .map(this::convertToImageDto) // Convert Image to ImageDto
+                        .collect(Collectors.toList()); // Collect into a List<ImageDto>
+                userDto.setImages(imageDtos);
+            }
         }
+
+        // Set UserDto to PostDto
+        postDto.setUsername(userDto);
 
         // Convert Comments
         postDto.setComments(post.getComments() != null ?
@@ -196,6 +222,7 @@ public class UserPostService {
         postDto.setShares(post.getShares() != null ?
                 post.getShares().stream().map(this::convertToShareDto).collect(Collectors.toSet()) : Collections.emptySet());
 
+        // Check if currentUser has liked the post
         if (currentUser != null) {
             boolean isLikedByUser = post.getLikeposts().stream()
                     .anyMatch(like -> like.getUsername().getUsername().equals(currentUser.getUsername()));
@@ -220,9 +247,13 @@ public class UserPostService {
         commentDto.setContent(comment.getContent());
         commentDto.setCreatedate(comment.getCreatedate());
 
-        if (comment.getUsername() != null) {
-            commentDto.setUsername(convertToUserDto(comment.getUsername()));
-        }
+        UserDto userDto = new UserDto();
+        userDto.setUsername(comment.getUsername().getUsername());
+        userDto.setFirstname(comment.getUsername().getFirstname());
+        userDto.setLastname(comment.getUsername().getLastname());
+
+        // Set UserDto to PostDto
+        commentDto.setUsername(userDto);
 
 //        if (comment.getPost() != null) {
 //            PostDto postDto = new PostDto();
@@ -285,5 +316,29 @@ public class UserPostService {
 //        }
 
         return shareDto;
+    }
+    public ImageDto convertToImageDto(Image image) {
+        // Create a new ImageDto object
+        ImageDto imageDto = new ImageDto();
+
+        // Set basic properties from Image to ImageDto
+        imageDto.setId(image.getId());
+        imageDto.setImage(image.getImage());
+        imageDto.setCreatedate(image.getCreatedate());
+        imageDto.setAvatarrurl(image.getAvatarrurl());
+        imageDto.setCoverurl(image.getCoverurl());
+        imageDto.setStatus(image.getStatus());
+
+        // If you need to set the username (the UserDto associated with the image)
+        if (image.getUsername() != null) {
+            UserDto userDto = new UserDto();
+            userDto.setUsername(image.getUsername().getUsername());
+            userDto.setFirstname(image.getUsername().getFirstname());
+            userDto.setLastname(image.getUsername().getLastname());
+            // Add any other necessary fields from User
+            imageDto.setUsername(userDto);
+        }
+
+        return imageDto;
     }
 }

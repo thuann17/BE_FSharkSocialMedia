@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Value;
 
 import java.io.Serializable;
+import java.util.Set;
 
 @Data
 public class PlaceDto implements Serializable {
@@ -17,4 +18,5 @@ public class PlaceDto implements Serializable {
     String address;
     @Size(max = 1000)
     String description;
+    Set<PlaceimageDto> placeimages;
 }

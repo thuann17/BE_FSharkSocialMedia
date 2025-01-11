@@ -28,4 +28,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Object[]> getPostsWithUserDetails(@Param("inputUsername") String username);
 
     List<Post> findAllByUsernameIn(List<User> usernames);
+
+    List<Post> findAllByUsernameInOrderByCreatedateDesc(List<User> users);
 }
