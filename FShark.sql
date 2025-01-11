@@ -237,3 +237,6 @@ WHERE
 END
 --thực thi thủ tục kết bạn 
 EXEC GetFriendsByUsername @username = 'thuanreal1';
+
+
+select * from Friends

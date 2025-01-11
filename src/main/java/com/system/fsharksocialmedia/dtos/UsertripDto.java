@@ -12,6 +12,5 @@ public class UsertripDto implements Serializable {
     TripDto tripid;
     UserDto userid;
     TriproleDto role;
-    @Size(max = 50)
-    String status;
+
 }

@@ -1,13 +1,17 @@
 package com.system.fsharksocialmedia.services.user;
 
+import com.system.fsharksocialmedia.dtos.ImageDto;
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.dtos.PostimageDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.entities.Postimage;
+import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.models.PostModel;
+import com.system.fsharksocialmedia.repositories.FriendRepository;
 import com.system.fsharksocialmedia.repositories.PostRepository;
 import com.system.fsharksocialmedia.repositories.PostimageRepository;
+import com.system.fsharksocialmedia.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +33,12 @@ public class PostService {
 
     @Autowired
     private PostimageRepository postImageRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private FriendRepository friendRepository;
 
     // Get all posts with optional search
     public Page<PostDto> getPost(int page, int size, String search) {
@@ -105,41 +116,68 @@ public class PostService {
             UserDto userDto = new UserDto();
             Set<PostimageDto> postImageDtos = new HashSet<>();
 
-
             // Set up PostDto
-            postDto.setId((Integer) result[0]);
-            postDto.setContent((String) result[5]);
+            postDto.setId((Integer) result[0]);  // Post ID
+            postDto.setContent((String) result[5]);  // Post content
+            postDto.setCreatedate(((Timestamp) result[6]).toInstant());  // Convert Timestamp to Instant
+            postDto.setStatus((Boolean) result[7]);  // Post status
+            postDto.setCountComment(((Number) result[8]).longValue());  // Count of comments (convert to Long)
+            postDto.setCountLike(((Number) result[9]).longValue());  // Count of likes (convert to Long)
 
-            // Convert Timestamp to Instant
-            postDto.setCreatedate(((Timestamp) result[6]).toInstant());
-
-            postDto.setStatus((Boolean) result[7]);
-            postDto.setCountComment(((Number) result[8]).longValue()); // Convert Integer/Long to Long
-            postDto.setCountLike(((Number) result[9]).longValue()); // Convert Integer/Long to Long
             // Set up UserDto
-            userDto.setUsername((String) result[1]);
-            userDto.setEmail((String) result[2]);
-            userDto.setFirstname((String) result[3]);
-            userDto.setLastname((String) result[4]);
+            userDto.setUsername((String) result[1]);  // Username
+            userDto.setEmail((String) result[2]);  // Email
+            userDto.setFirstname((String) result[3]);  // Firstname
+            userDto.setLastname((String) result[4]);  // Lastname
+
+            // Handle avatar URLs (result[10])
+            String avatarUrlsString = (String) result[11];
+            if (avatarUrlsString != null && !avatarUrlsString.isEmpty()) {
+                // Parse the avatar URLs if they are comma-separated or in JSON format
+                List<ImageDto> avatarUrls = parseAvatarUrls(avatarUrlsString);
+                userDto.setImages(avatarUrls);  // Set the parsed avatar URLs
+            }
+
             // Associate UserDto with PostDto
             postDto.setUsername(userDto);
-            // Fetch associated post images using the full Post object
+
+            // Fetch associated post images using the Post ID
             Post post = new Post();
-            post.setId(postDto.getId()); // Create a Post object to fetch the images
-            List<Postimage> postImages = postImageRepository.findByPostid(post); // Use Post object
+            post.setId(postDto.getId());  // Set Post ID to fetch images related to this post
+            List<Postimage> postImages = postImageRepository.findByPostid(post);  // Fetch post images
+
             // Convert Postimage entities to PostimageDto
             for (Postimage postImage : postImages) {
                 PostimageDto postImageDto = new PostimageDto();
-                postImageDto.setId(postImage.getId());
+                postImageDto.setId(postImage.getId());  // Postimage ID
                 postImageDto.setPostid(convertToDto(postImage.getPostid()));  // Convert Post to PostDto
-                postImageDto.setImage(postImage.getImage());
+                postImageDto.setImage(postImage.getImage());  // Post image URL
 
-                postImageDtos.add(postImageDto); // Add the PostimageDto to the list
+                postImageDtos.add(postImageDto);  // Add to the set of images
             }
-            // Add images to the PostDto
-            postDto.setPostimages( postImageDtos);
 
-            return postDto;
-        }).collect(Collectors.toList());
+            // Add images to the PostDto
+            postDto.setPostimages(postImageDtos);
+
+            return postDto;  // Return the fully populated PostDto
+        }).collect(Collectors.toList());  // Collect into a list of PostDto
     }
+
+    // Helper method to parse avatar URLs
+    private List<ImageDto> parseAvatarUrls(String avatarUrlsString) {
+        List<ImageDto> avatarUrls = new ArrayList<>();
+        try {
+            // If the string is comma-separated
+            String[] urls = avatarUrlsString.split(",");
+            for (String url : urls) {
+                ImageDto imageDto = new ImageDto();
+                imageDto.setAvatarrurl(url.trim());  // Set the URL after trimming whitespace
+                avatarUrls.add(imageDto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Log parsing errors if any
+        }
+        return avatarUrls;
+    }
+
 }

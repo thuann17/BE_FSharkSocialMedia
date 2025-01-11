@@ -50,9 +50,9 @@ public class UserPostController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody PostModel postModel) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(uPostService.addPost(postModel));
+    @PostMapping("/{username}")
+    public ResponseEntity<PostDto> createPost(@PathVariable String username, @RequestBody PostModel postModel) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(uPostService.addPost(username, postModel));
     }
 
     @PutMapping("/{postID}")

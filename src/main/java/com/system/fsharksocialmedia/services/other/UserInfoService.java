@@ -52,7 +52,7 @@ public class UserInfoService implements UserDetailsService {
     private UserDto convertToUserDtoWithImages(User user) {
         UserDto userDto = convertToUserDto(user);
         List<ImageDto> imageDtos = (user.getImages() != null) ? user.getImages().stream()
-                .map(this::convertToImageDto)
+                .map(this::convertToImagesDto)
                 .collect(Collectors.toList()) : new ArrayList<>();
         userDto.setImages(imageDtos);
         return userDto;
@@ -211,7 +211,7 @@ public class UserInfoService implements UserDetailsService {
         if (user.getImages() != null && !user.getImages().isEmpty()) {
             List<ImageDto> imageDtos = new ArrayList<>();
             for (Image image : user.getImages()) {
-                ImageDto imageDto = convertToImageDto(image);
+                ImageDto imageDto = convertToImagesDto(image);
                 imageDtos.add(imageDto);
             }
             userDto.setImages(imageDtos);
@@ -219,7 +219,7 @@ public class UserInfoService implements UserDetailsService {
         return userDto;
     }
 
-    public ImageDto convertToImageDto(Image image) {
+    public ImageDto convertToImagesDto(Image image) {
         ImageDto imageDto = new ImageDto();
 
         if (image != null) {

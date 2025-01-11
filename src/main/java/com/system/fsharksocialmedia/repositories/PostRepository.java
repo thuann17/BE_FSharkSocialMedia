@@ -31,4 +31,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findByStatus(Boolean status, Pageable pageable);
     Page<Post> findByContentContainingIgnoreCaseAndStatus(String search, Boolean status, Pageable pageable);
 
+
+    List<Post> findAllByUsernameInOrderByCreatedateDesc(List<User> users);
 }

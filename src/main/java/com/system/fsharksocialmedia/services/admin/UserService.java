@@ -69,10 +69,7 @@ public class UserService {
         return userOptional.map(this::toDto).orElse(null);
     }
 
-    @Transactional(readOnly = true)
-    public List<User> getUsersWithoutFriends(String username) {
-        return userRepository.findUsersWithoutFriends(username);
-    }
+
 
 
 }
