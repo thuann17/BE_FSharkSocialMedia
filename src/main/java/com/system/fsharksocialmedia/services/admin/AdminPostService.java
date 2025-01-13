@@ -1,5 +1,6 @@
 package com.system.fsharksocialmedia.services.admin;
 
+import com.system.fsharksocialmedia.dtos.CommentDto;
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.Post;
@@ -17,37 +18,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class AdminPostService {
     @Autowired
     private PostRepository postRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder encoder;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
-    public Page<PostDto> getPost(int page, int size, String search, Boolean status) {
+
+    public Page<PostDto> getPost(int page, int size) {
         if (page < 0 || size <= 0) {
             throw new IllegalArgumentException("Page number must be non-negative and size must be greater than zero");
         }
-
         Pageable pageable = PageRequest.of(page, size);
-        Page<Post> posts;
-
-        if (status == null) {
-            posts = (search == null || search.isEmpty())
-                    ? postRepository.findAll(pageable)
-                    : postRepository.findByContentContainingIgnoreCase(search, pageable);
-        } else {
-            posts = (search == null || search.isEmpty())
-                    ? postRepository.findByStatus(status, pageable)
-                    : postRepository.findByContentContainingIgnoreCaseAndStatus(search, status, pageable);
-        }
-
+        Page<Post> posts = postRepository.findAll(pageable);
         return posts.map(this::convertToDto);
     }
 
@@ -58,7 +43,7 @@ public class AdminPostService {
         return convertToDto(post);
     }
 
-    public PostDto updatePost(PostModel postModel, Integer postId) {
+    public PostDto updatePost(Integer postId,PostModel postModel) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
         post.setStatus(postModel.isStatus());
@@ -67,16 +52,30 @@ public class AdminPostService {
 
     // Convert entity to DTO
     private PostDto convertToDto(Post post) {
-        long commentCount = postRepository.countCmtByPost(post.getId());
-        long likeCount = postRepository.countLikeByPost(post.getId());
         PostDto postDto = new PostDto();
-
         postDto.setId(post.getId());
         postDto.setCreatedate(post.getCreatedate());
         postDto.setContent(post.getContent());
-        postDto.setCountComment(commentCount);
-        postDto.setCountLike(likeCount);
         postDto.setStatus(post.getStatus());
+        if (post.getComments() != null && !post.getComments().isEmpty()) {
+            Set<CommentDto> commentDtos = post.getComments().stream().map(comment -> {
+                CommentDto commentDto = new CommentDto();
+                commentDto.setId(comment.getId());
+                commentDto.setContent(comment.getContent());
+                commentDto.setImage(comment.getImage());
+                commentDto.setCreatedate(comment.getCreatedate());
+
+                if (comment.getUsername() != null) {
+                    UserDto userDto = new UserDto();
+                    userDto.setUsername(comment.getUsername().getUsername());
+                    userDto.setFirstname(comment.getUsername().getFirstname());
+                    userDto.setLastname(comment.getUsername().getLastname());
+                    commentDto.setUsername(userDto);
+                }
+                return commentDto;
+            }).collect(Collectors.toSet());
+            postDto.setComments(commentDtos);
+        }
         if (post.getUsername() != null) {
             UserDto userDto = new UserDto();
             userDto.setUsername(post.getUsername().getUsername());
@@ -85,6 +84,10 @@ public class AdminPostService {
             userDto.setEmail(post.getUsername().getEmail());
             postDto.setUsername(userDto);
         }
+        long commentCount = postRepository.countCmtByPost(post.getId());
+        long likeCount = postRepository.countLikeByPost(post.getId());
+        postDto.setCountComment(commentCount);
+        postDto.setCountLike(likeCount);
         return postDto;
     }
 }

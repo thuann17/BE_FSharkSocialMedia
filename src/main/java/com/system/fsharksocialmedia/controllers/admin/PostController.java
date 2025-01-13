@@ -18,18 +18,10 @@ public class PostController {
     @GetMapping
     public ResponseEntity<Page<PostDto>> getPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String status) {
-        Boolean statusBoolean = null;
-        if (status != null) {
-            if ("true".equalsIgnoreCase(status)) {
-                statusBoolean = true;
-            } else if ("false".equalsIgnoreCase(status)) {
-                statusBoolean = false;
-            }
-        }
-        Page<PostDto> posts = adminPostService.getPost(page, size, search, statusBoolean);
+            @RequestParam(defaultValue = "7") int size
+    ) {
+
+        Page<PostDto> posts = adminPostService.getPost(page, size);
         return ResponseEntity.ok(posts);
     }
 
@@ -40,7 +32,7 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
-    public ResponseEntity<PostDto> updatePost(PostModel postModel, @PathVariable Integer postId) {
-        return ResponseEntity.ok(adminPostService.updatePost(postModel, postId));
+    public ResponseEntity<PostDto> updatePost(@PathVariable Integer postId, @RequestBody PostModel postModel) {
+        return ResponseEntity.ok(adminPostService.updatePost(postId, postModel));
     }
 }

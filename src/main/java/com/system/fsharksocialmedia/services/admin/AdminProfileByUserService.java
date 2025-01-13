@@ -1,30 +1,34 @@
 package com.system.fsharksocialmedia.services.admin;
 
-import com.system.fsharksocialmedia.dtos.ImageDto;
-import com.system.fsharksocialmedia.dtos.PostDto;
-import com.system.fsharksocialmedia.dtos.UserDto;
-import com.system.fsharksocialmedia.dtos.UserroleDto;
+import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.Image;
 import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.entities.Userrole;
 import com.system.fsharksocialmedia.exceptions.UserNotFoundException;
+import com.system.fsharksocialmedia.models.UserModel;
+import com.system.fsharksocialmedia.repositories.ImageRepository;
 import com.system.fsharksocialmedia.repositories.PostRepository;
 import com.system.fsharksocialmedia.repositories.UserRepository;
 import com.system.fsharksocialmedia.services.user.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminProfileByUserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PostService postService;
-    @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ImageRepository imageRepository;
 
     public UserDto getUserByUsername(String username) {
         User u = userRepository.findById(username).orElseThrow(() -> new UserNotFoundException("Không có user: " + username));
@@ -36,6 +40,52 @@ public class AdminProfileByUserService {
         List<Post> listPosts = postRepository.findByUsername(user);
         return listPosts.stream().map(this::convertPostToDto).toList();
     }
+
+    public UserDto updateProfile(String username, UserModel model) {
+        try {
+            User u = userRepository.findById(username).orElseThrow(() -> new UserNotFoundException(username));
+            u.setFirstname(model.getFirstname());
+            u.setLastname(model.getLastname());
+            u.setHometown(model.getHometown());
+            u.setEmail(model.getEmail());
+            return convertToDto(userRepository.save(u));
+        } catch (RuntimeException e) {
+            throw new UserNotFoundException(e.getMessage());
+        }
+    }
+
+    public UserDto updatePassword(String username, String oldPassword, String newPassword) {
+        try {
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user == null) {
+                throw new RuntimeException("User not found.");
+            }
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+                throw new RuntimeException("Old password is incorrect.");
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            return convertToDto(user);
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred while updating the password", e);
+        }
+    }
+
+    public UserDto updateImage(String username, UserModel model) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+        if (model.getAvatarUrl() != null) {
+            Image newImage = new Image();
+            newImage.setAvatarrurl(model.getAvatarUrl());
+            newImage.setUsername(user);
+            newImage.setStatus(true);
+            imageRepository.save(newImage);
+        }
+        userRepository.save(user);
+        return convertToDto(user);
+    }
+
+
 
     public UserDto convertToDto(User user) {
         UserDto dto = new UserDto();
@@ -49,7 +99,6 @@ public class AdminProfileByUserService {
         dto.setBirthday(user.getBirthday());
         dto.setHometown(user.getHometown());
         dto.setCurrency(user.getCurrency());
-
         if (user.getRoles() != null) {
             UserroleDto userRoleDto = new UserroleDto();
             userRoleDto.setRole(user.getRoles().getRole());
@@ -60,27 +109,7 @@ public class AdminProfileByUserService {
         return dto;
     }
 
-    public User convertToEntity(UserDto dto) {
-        if (dto == null) return null;
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setActive(dto.getActive());
-        user.setBio(dto.getBio());
-        user.setEmail(dto.getEmail());
-        user.setGender(dto.getGender());
-        user.setLastname(dto.getLastname());
-        user.setFirstname(dto.getFirstname());
-        user.setBirthday(dto.getBirthday());
-        user.setHometown(dto.getHometown());
-        user.setCurrency(dto.getCurrency());
 
-        if (dto.getRoles() != null) {
-            user.setRoles(convertToEntity(dto.getRoles()));
-        }
-
-
-        return user;
-    }
 
     private Userrole convertToEntity(UserroleDto dto) {
         Userrole userRole = new Userrole();
@@ -95,21 +124,42 @@ public class AdminProfileByUserService {
     }
 
     private PostDto convertPostToDto(Post post) {
-        long commentCount = postRepository.countCmtByPost(post.getId());
-        long likeCount = postRepository.countLikeByPost(post.getId());
         PostDto postDto = new PostDto();
         postDto.setId(post.getId());
+        postDto.setCreatedate(post.getCreatedate());
         postDto.setContent(post.getContent());
-        postDto.setCountLike(commentCount);
-        postDto.setCountComment(commentCount);
+        postDto.setStatus(post.getStatus());
+        if (post.getComments() != null && !post.getComments().isEmpty()) {
+            Set<CommentDto> commentDtos = post.getComments().stream().map(comment -> {
+                CommentDto commentDto = new CommentDto();
+                commentDto.setId(comment.getId());
+                commentDto.setContent(comment.getContent());
+                commentDto.setImage(comment.getImage());
+                commentDto.setCreatedate(comment.getCreatedate());
 
-        postDto.setCountLike(likeCount);
-        UserDto userDto = null;
-        if (post.getUsername() != null) {
-            userDto = new UserDto();
-            userDto.setUsername(post.getUsername().getUsername());
+                if (comment.getUsername() != null) {
+                    UserDto userDto = new UserDto();
+                    userDto.setUsername(comment.getUsername().getUsername());
+                    userDto.setFirstname(comment.getUsername().getFirstname());
+                    userDto.setLastname(comment.getUsername().getLastname());
+                    commentDto.setUsername(userDto);
+                }
+                return commentDto;
+            }).collect(Collectors.toSet());
+            postDto.setComments(commentDtos);
         }
-        postDto.setUsername(userDto);
+        if (post.getUsername() != null) {
+            UserDto userDto = new UserDto();
+            userDto.setUsername(post.getUsername().getUsername());
+            userDto.setFirstname(post.getUsername().getFirstname());
+            userDto.setLastname(post.getUsername().getLastname());
+            userDto.setEmail(post.getUsername().getEmail());
+            postDto.setUsername(userDto);
+        }
+        long commentCount = postRepository.countCmtByPost(post.getId());
+        long likeCount = postRepository.countLikeByPost(post.getId());
+        postDto.setCountComment(commentCount);
+        postDto.setCountLike(likeCount);
         return postDto;
     }
 }
