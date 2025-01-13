@@ -4,11 +4,13 @@ import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.CommentModel;
 import com.system.fsharksocialmedia.models.PostModel;
+import com.system.fsharksocialmedia.models.ShareModel;
 import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +31,9 @@ public class UserPostService {
     private CommentRepository commentRepository;
 
     @Autowired
+    private ShareRepository shareRepository;
+
+    @Autowired
     private LikecmtRepository likecmtRepository;
 
     @Autowired
@@ -36,6 +41,10 @@ public class UserPostService {
 
     @Autowired
     PostimageRepository postImageRepository;
+
+    @Autowired
+    private PostimageRepository postimageRepository;
+
 
     public List<PostDto> getPostsByFriends(String username) {
         User currentUser = userRepository.findByUsername(username)
@@ -58,17 +67,139 @@ public class UserPostService {
                 .collect(Collectors.toList());
     }
 
-    // Add a new post
-    public PostDto addPost(String username, PostModel postModel) {
-        Post post = new Post();
+    @Transactional
+    public List<ShareDto> getSharesByUsername(String username) {
+        List<Object[]> results = shareRepository.getSharesByUsername(username);
+
+        return results.stream().map(record -> {
+            ShareDto shareDto = new ShareDto();
+            shareDto.setId((Integer) record[0]);
+
+            // UserDto for the person who shared the post
+            UserDto sharedBy = new UserDto();
+            sharedBy.setUsername((String) record[1]);
+            sharedBy.setFirstname((String) record[12]);  // First name of the user sharing the post
+            sharedBy.setLastname((String) record[13]);   // Last name of the user sharing the post
+
+            ImageDto sharedByAvatar = new ImageDto();
+            sharedByAvatar.setAvatarrurl((String) record[2]);
+            sharedBy.setImages(List.of(sharedByAvatar));
+            shareDto.setUsername(sharedBy);
+
+            shareDto.setContent((String) record[3]);
+            shareDto.setCreatedate(((java.sql.Timestamp) record[4]).toInstant());
+
+            // PostDto for the shared post
+            PostDto postDto = new PostDto();
+            postDto.setId((Integer) record[5]);
+
+            // UserDto for the post author
+            UserDto postAuthor = new UserDto();
+            postAuthor.setUsername((String) record[6]);
+            postAuthor.setFirstname((String) record[14]);  // First name of the post author
+            postAuthor.setLastname((String) record[15]);   // Last name of the post author
+
+            ImageDto postAuthorAvatar = new ImageDto();
+            postAuthorAvatar.setAvatarrurl((String) record[7]);
+            postAuthor.setImages(List.of(postAuthorAvatar));
+            postDto.setUsername(postAuthor);
+
+            postDto.setContent((String) record[8]);
+            postDto.setCreatedate(((java.sql.Timestamp) record[9]).toInstant());
+            postDto.setStatus((Boolean) record[10]);
+
+            // Post image (if any)
+            PostimageDto postImage = new PostimageDto();
+            postImage.setImage((String) record[11]);
+            postDto.setPostimages(Set.of(postImage));
+
+            shareDto.setPost(postDto);
+
+            return shareDto;
+        }).collect(Collectors.toList());
+    }
+
+    public ShareDto addShare(String username, Integer postId, ShareModel model) {
+
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        Post postid = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Bài viết không tồn tại!"));
+
+        // Convert ShareDto to Share entity
+        Share share = new Share();
+        share.setUsername(currentUser);  // Set the user
+        share.setPost(postid);  // Set the post
+        share.setContent(model.getContent());  // Set the content
+
+        // Set current timestamp as the creation date
+        share.setCreatedate(Instant.now());
+
+        // Save the entity to the database
+        Share savedShare = shareRepository.save(share);
+
+        // Create and set the ShareDto
+        ShareDto savedShareDto = new ShareDto();
+        savedShareDto.setId(savedShare.getId());
+
+        // Map User entity to UserDto
+        UserDto userDto = new UserDto();
+        userDto.setUsername(currentUser.getUsername());
+        userDto.setFirstname(currentUser.getFirstname());
+        userDto.setLastname(currentUser.getLastname());
+        // Add any other required fields here
+
+        savedShareDto.setUsername(userDto);
+
+        // Map Post entity to PostDto
+        PostDto postDto = new PostDto();
+        postDto.setId(postid.getId());
+        postDto.setContent(postid.getContent());
+        postDto.setCreatedate(postid.getCreatedate());
+        // Add any other required fields here
+
+        savedShareDto.setPost(postDto);
+
+        savedShareDto.setContent(savedShare.getContent());
+        savedShareDto.setCreatedate(savedShare.getCreatedate());
+
+        return savedShareDto;
+    }
+
+
+
+    public PostDto addPost(String username, PostModel postModel) {
+        // Fetch the user from the database
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        // Create a new post object and set its properties
+        Post post = new Post();
         post.setUsername(currentUser);
         post.setContent(postModel.getContent());
-        post.setStatus(false);
+        post.setStatus(true); // Set post status (adjust based on your use case)
         post.setCreatedate(Instant.now());
-        return convertToDto(postRepository.save(post), null); // Pass null if no currentUser
+
+        // Save the post and get the saved post
+        Post savedPost = postRepository.save(post);
+
+        // If there are images in the post model, save them
+        if (postModel.getImagePosts() != null && !postModel.getImagePosts().isEmpty()) {
+            // Iterate over each image in the list
+            for (String image : postModel.getImagePosts()) {
+                Postimage postimage = new Postimage();
+                postimage.setPostid(savedPost); // Set the saved post for the Postimage
+                postimage.setImage(image);     // Set the image URL (or path)
+                postimageRepository.save(postimage); // Save each image
+            }
+        }
+
+        // Convert the saved post to DTO and return it
+        return convertToDto(savedPost, null);
     }
+
+
 
     // Update a post
     public PostDto updatePost(Integer postID, PostModel postModel) {
@@ -80,11 +211,46 @@ public class UserPostService {
     }
 
     // Delete a post
+    @Transactional
     public void deletePost(Integer postId) {
-        if (postId == null) {
-            throw new RuntimeException("Không có ID: " + postId);
-        }
-        postRepository.deleteById(postId);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài đăng với ID: " + postId));
+
+        // Xóa Comment liên quan
+        commentRepository.deleteByPost(post);
+
+        // Xóa Like liên quan
+        likepostRepository.deleteByPost(post);
+
+        // Xóa hình ảnh của bài viết
+        postImageRepository.deleteByPostid(post);
+
+        // Xóa Share liên quan
+        shareRepository.deleteByPost(post);
+
+        // Xóa bài đăng
+        postRepository.delete(post);
+    }
+
+    // Delete a comment
+    public void deleteComment(Integer cmtId) {
+        Comment cmt = commentRepository.findById(cmtId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy cmt với ID: " + cmtId));
+        likecmtRepository.deleteByComment(cmt);
+
+        // Xóa Comment liên quan
+        commentRepository.deleteById(cmtId);
+
+    }
+
+    // Delete a comment
+    public void deleteShare(Integer shareId) {
+        Share cmt = shareRepository.findById(shareId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy cmt với ID: " + shareId));
+
+        // Xóa Comment liên quan
+        shareRepository.deleteById(shareId);
+
     }
 
     public Long countLikesForPost(Integer postId) {
@@ -189,9 +355,7 @@ public class UserPostService {
             userDto.setUsername(post.getUsername().getUsername());
             userDto.setFirstname(post.getUsername().getFirstname());
             userDto.setLastname(post.getUsername().getLastname());
-
-            // Convert User images (use Set<ImageDto>)
-            if (post.getUsername().getImages() != null) {
+            if (post.getId() != null) {
                 List<ImageDto> imageDtos = post.getUsername().getImages().stream()
                         .map(this::convertToImageDto) // Convert Image to ImageDto
                         .collect(Collectors.toList()); // Collect into a List<ImageDto>

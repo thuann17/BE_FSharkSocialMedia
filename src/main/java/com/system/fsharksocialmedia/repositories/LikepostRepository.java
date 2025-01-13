@@ -18,4 +18,6 @@ public interface LikepostRepository extends JpaRepository<Likepost, Integer> {
     boolean existsByUsernameAndPostId(User username, Integer postId);
 
     Likepost findByUsernameAndPostId(User username, Integer postId);
+
+    void deleteByPost(Post postId);
 }

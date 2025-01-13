@@ -163,6 +163,64 @@ public class PostService {
         }).collect(Collectors.toList());  // Collect into a list of PostDto
     }
 
+    @Transactional
+    public List<PostDto> getSharesWithUserDetailsAndPost(String username) {
+        // Fetch the results from the repository using the stored procedure
+        List<Object[]> results = postRepository.getPostsWithUserDetails(username);
+
+        // Map the results to PostDto
+        return results.stream().map(result -> {
+            PostDto postDto = new PostDto();
+            UserDto userDto = new UserDto();
+            Set<PostimageDto> postImageDtos = new HashSet<>();
+
+            // Set up PostDto
+            postDto.setId((Integer) result[0]);  // Post ID
+            postDto.setContent((String) result[5]);  // Post content
+            postDto.setCreatedate(((Timestamp) result[6]).toInstant());  // Convert Timestamp to Instant
+            postDto.setStatus((Boolean) result[7]);  // Post status
+            postDto.setCountComment(((Number) result[8]).longValue());  // Count of comments (convert to Long)
+            postDto.setCountLike(((Number) result[9]).longValue());  // Count of likes (convert to Long)
+
+            // Set up UserDto
+            userDto.setUsername((String) result[1]);  // Username
+            userDto.setEmail((String) result[2]);  // Email
+            userDto.setFirstname((String) result[3]);  // Firstname
+            userDto.setLastname((String) result[4]);  // Lastname
+
+            // Handle avatar URLs (result[10])
+            String avatarUrlsString = (String) result[11];
+            if (avatarUrlsString != null && !avatarUrlsString.isEmpty()) {
+                // Parse the avatar URLs if they are comma-separated or in JSON format
+                List<ImageDto> avatarUrls = parseAvatarUrls(avatarUrlsString);
+                userDto.setImages(avatarUrls);  // Set the parsed avatar URLs
+            }
+
+            // Associate UserDto with PostDto
+            postDto.setUsername(userDto);
+
+            // Fetch associated post images using the Post ID
+            Post post = new Post();
+            post.setId(postDto.getId());  // Set Post ID to fetch images related to this post
+            List<Postimage> postImages = postImageRepository.findByPostid(post);  // Fetch post images
+
+            // Convert Postimage entities to PostimageDto
+            for (Postimage postImage : postImages) {
+                PostimageDto postImageDto = new PostimageDto();
+                postImageDto.setId(postImage.getId());  // Postimage ID
+                postImageDto.setPostid(convertToDto(postImage.getPostid()));  // Convert Post to PostDto
+                postImageDto.setImage(postImage.getImage());  // Post image URL
+
+                postImageDtos.add(postImageDto);  // Add to the set of images
+            }
+
+            // Add images to the PostDto
+            postDto.setPostimages(postImageDtos);
+
+            return postDto;  // Return the fully populated PostDto
+        }).collect(Collectors.toList());  // Collect into a list of PostDto
+    }
+
     // Helper method to parse avatar URLs
     private List<ImageDto> parseAvatarUrls(String avatarUrlsString) {
         List<ImageDto> avatarUrls = new ArrayList<>();

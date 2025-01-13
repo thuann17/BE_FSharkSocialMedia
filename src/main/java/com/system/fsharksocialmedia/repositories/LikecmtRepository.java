@@ -1,6 +1,8 @@
 package com.system.fsharksocialmedia.repositories;
 
+import com.system.fsharksocialmedia.entities.Comment;
 import com.system.fsharksocialmedia.entities.Likecmt;
+import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
@@ -12,4 +14,6 @@ public interface LikecmtRepository extends JpaRepository<Likecmt, Integer> {
     int getLikeCountByCommentId(@Param("CommentId") Integer commentId);
 
     boolean existsByCommentIdAndUsername(Integer commentId, User username);
+
+    void deleteByComment(Comment comment);
 }

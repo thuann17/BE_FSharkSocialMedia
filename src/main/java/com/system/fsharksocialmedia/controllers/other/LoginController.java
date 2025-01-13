@@ -52,7 +52,6 @@ public class LoginController {
     public ResponseEntity<Map<String, String>> authenticateAndGetToken(@RequestBody LoginModel loginModel) {
         Map<String, String> response = new HashMap<>();
         try {
-
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginModel.getUsername(), loginModel.getPassword()));
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(loginModel.getUsername());

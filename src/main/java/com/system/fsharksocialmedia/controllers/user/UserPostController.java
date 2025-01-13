@@ -4,10 +4,12 @@ package com.system.fsharksocialmedia.controllers.user;
 import com.system.fsharksocialmedia.dtos.CommentDto;
 import com.system.fsharksocialmedia.dtos.LikepostDto;
 import com.system.fsharksocialmedia.dtos.PostDto;
+import com.system.fsharksocialmedia.dtos.ShareDto;
 import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.models.CommentModel;
 import com.system.fsharksocialmedia.models.PostModel;
+import com.system.fsharksocialmedia.models.ShareModel;
 import com.system.fsharksocialmedia.services.user.UserPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,7 @@ public class UserPostController {
     @Autowired
     private UserPostService uPostService;
 
+
     @GetMapping("/getPostByListFriends")
     public ResponseEntity<List<PostDto>> getPost(@RequestParam String username) {
         return ResponseEntity.ok().body(uPostService.getPostsByFriends(username));
@@ -50,9 +53,33 @@ public class UserPostController {
         }
     }
 
+    @GetMapping("/shares/{username}")
+    public ResponseEntity<List<ShareDto>> getSharesByUsername(@PathVariable String username) {
+        List<ShareDto> shares = uPostService.getSharesByUsername(username);
+        if (shares.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(shares);
+    }
+
     @PostMapping("/{username}")
     public ResponseEntity<PostDto> createPost(@PathVariable String username, @RequestBody PostModel postModel) {
         return ResponseEntity.status(HttpStatus.CREATED).body(uPostService.addPost(username, postModel));
+    }
+
+    @PostMapping("share/add/{username}/{postId}")
+    public ResponseEntity<ShareDto> addShare(
+            @PathVariable String username, @PathVariable Integer postId,
+            @RequestBody ShareModel model) {
+
+        try {
+            // Call the service method to add a new share
+            ShareDto shareDto = uPostService.addShare(username,postId, model);
+            return ResponseEntity.ok(shareDto); // Return the created ShareDto with 200 OK status
+        } catch (RuntimeException e) {
+            // In case of error (like user not found or post not found)
+            return ResponseEntity.status(400).body(null); // Return 400 Bad Request
+        }
     }
 
     @PutMapping("/{postID}")
@@ -65,6 +92,16 @@ public class UserPostController {
         uPostService.deletePost(postID);
         return ResponseEntity.noContent().build();
 
+    }
+
+    @DeleteMapping("deleteShare/{shareId}")
+    public ResponseEntity<String> deleteShare(@PathVariable Integer shareId) {
+        try {
+            uPostService.deleteShare(shareId);  // Call the delete method from service
+            return ResponseEntity.ok("Bài chia sẻ đã bị xóa!");  // Return success message
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());  // Return error if not found
+        }
     }
 
     @GetMapping("/count/{postId}")
@@ -147,6 +184,16 @@ public class UserPostController {
         } catch (RuntimeException e) {
             // Nếu không tìm thấy người dùng, trả về lỗi
             return ResponseEntity.status(404).body(false);
+        }
+    }
+
+    @DeleteMapping("deletecmt/{id}")
+    public ResponseEntity<String> deleteComment(@PathVariable("id") Integer cmtId) {
+        try {
+            uPostService.deleteComment(cmtId);
+            return ResponseEntity.ok("Comment deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error deleting comment: " + e.getMessage());
         }
     }
 
