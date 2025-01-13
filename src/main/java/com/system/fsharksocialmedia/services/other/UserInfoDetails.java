@@ -48,7 +48,7 @@ public class UserInfoDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return isActive != null && isActive;  // Account is locked if 'active' is false
+        return isActive != null && isActive;
     }
 
     @Override
