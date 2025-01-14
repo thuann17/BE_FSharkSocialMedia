@@ -18,7 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountService {
@@ -47,43 +49,25 @@ public class AccountService {
             userRoleDto.setRole(user.getRoles().getRole());
             dto.setRoles(userRoleDto);
         }
-
-
+        if (user.getImages() != null) {
+            List<ImageDto> imageDtos = user.getImages().stream()
+                    .map(this::convertToImageDto)
+                    .collect(Collectors.toList());
+            dto.setImages(imageDtos);
+        }
         return dto;
     }
 
-    // Convert UserDto to User entity (optional if needed)
-    public User convertToEntity(UserDto dto) {
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setActive(dto.getActive());
-        user.setBio(dto.getBio());
-        user.setEmail(dto.getEmail());
-        user.setGender(dto.getGender());
-        user.setLastname(dto.getLastname());
-        user.setFirstname(dto.getFirstname());
-        user.setBirthday(dto.getBirthday());
-        user.setHometown(dto.getHometown());
-        user.setCurrency(dto.getCurrency());
-        if (dto.getRoles() != null) {
-            user.setRoles(convertToEntity(dto.getRoles()));
-        }
-        return user;
+    public ImageDto convertToImageDto(Image image) {
+        ImageDto imageDto = new ImageDto();
+        imageDto.setId(image.getId());
+        imageDto.setImage(image.getImage());
+        imageDto.setCreatedate(image.getCreatedate());
+        imageDto.setAvatarrurl(image.getAvatarrurl());
+        imageDto.setCoverurl(image.getCoverurl());
+        imageDto.setStatus(image.getStatus());
+        return imageDto;
     }
-
-
-    private Userrole convertToEntity(UserroleDto dto) {
-        Userrole userRole = new Userrole();
-        userRole.setRole(dto.getRole());
-        return userRole;
-    }
-
-    private Image convertToEntity(ImageDto dto) {
-        Image image = new Image();
-        image.setImage(dto.getImage());
-        return image;
-    }
-
     public Page<UserDto> getUsers(int page, int size, String search) {
         try {
             Pageable pageable = PageRequest.of(page, size);
@@ -185,7 +169,6 @@ public class AccountService {
         return userRepository.findById(username);
     }
 
-    // Get user by username and return DTO
     public UserDto getUserByUsername(String username) {
         Optional<User> userOptional = findByUsername(username);
         return userOptional.map(this::convertToDto).orElse(null);
@@ -195,7 +178,6 @@ public class AccountService {
         // Tìm người dùng trong cơ sở dữ liệu
         User user = userRepository.findByUsername(username).orElse(null);
 
-        // Kiểm tra xem người dùng có tồn tại không
         if (user == null) {
             throw new Exception("User not found");
         }
@@ -211,7 +193,6 @@ public class AccountService {
         // Lưu thay đổi vào cơ sở dữ liệu
         user = userRepository.save(user);
 
-        // Chuyển đổi từ User entity sang UserDto để trả về thông tin
         return convertToDto(user);
     }
 

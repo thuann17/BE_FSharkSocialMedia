@@ -23,5 +23,7 @@ public class PostDto implements Serializable {
     Set<ShareDto> shares;
     Long countLike;
     Long countComment;
-     boolean isLikedByUser;
+    boolean isLikedByUser;
+    Integer countPost;
+    Integer tripCount;
 }

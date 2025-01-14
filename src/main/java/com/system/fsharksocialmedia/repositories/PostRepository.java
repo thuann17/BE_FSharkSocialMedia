@@ -1,5 +1,6 @@
 package com.system.fsharksocialmedia.repositories;
 
+import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.entities.User;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 
 import java.util.List;
+import java.util.Map;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
 
@@ -27,5 +29,17 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Procedure(procedureName = "GetPostsWithUserDetails")
     List<Object[]> getPostsWithUserDetails(@Param("inputUsername") String username);
 
-    List<Post> findAllByUsernameInOrderByCreatedateDesc(List<User> users);
+    List<Post> findAllByUsernameInAndStatusTrueOrderByCreatedateDesc(List<User> users);
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE " +
+            "(:year IS NULL OR FUNCTION('YEAR', p.createdate) = :year) AND " +
+            "(:month IS NULL OR FUNCTION('MONTH', p.createdate) = :month)")
+    Integer countPostsByYearAndMonth(@Param("year") Integer year, @Param("month") Integer month);
+
+    @Query(value = "EXEC GetUserPostCount :year, :month", nativeQuery = true)
+    List<Map<String, Object>> getUserPostCount(int year, int month);
+
+    @Query(value = "EXEC GetUserPostCountTop5 :year, :month", nativeQuery = true)
+    List<Map<String, Object>> GetUserPostCountTop5(int year, int month);
+
 }
