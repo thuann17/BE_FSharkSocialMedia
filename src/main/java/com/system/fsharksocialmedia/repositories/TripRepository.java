@@ -14,6 +14,7 @@ public interface TripRepository extends JpaRepository<Trip, Integer> {
             "(:year IS NULL OR FUNCTION('YEAR', p.createdate) = :year) AND " +
             "(:month IS NULL OR FUNCTION('MONTH', p.createdate) = :month)")
     Integer countTripsByYearAndMonth(@Param("year") Integer year, @Param("month") Integer month);
+    
     @Query("SELECT t , p, ut FROM Trip t " +
             "JOIN t.usertrips ut " +
             "JOIN ut.userid u " +

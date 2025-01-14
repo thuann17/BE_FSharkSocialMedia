@@ -20,6 +20,8 @@ import com.system.fsharksocialmedia.services.user.PostService;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +63,30 @@ public class UserPostController {
         }
         return ResponseEntity.ok(shares);
     }
+
+    @GetMapping("feed/{username}")
+    public List<Object> getUserFeed(@PathVariable String username) {
+        // Lấy danh sách bài viết từ bạn bè
+        List<PostDto> posts = uPostService.getPostsByFriends(username);
+
+        // Lấy danh sách bài viết được chia sẻ
+        List<ShareDto> shares = uPostService.getSharesByUsername(username);
+
+        // Kết hợp bài viết và chia sẻ vào một list chung
+        List<Object> combinedFeed = new ArrayList<>();
+        combinedFeed.addAll(posts);
+        combinedFeed.addAll(shares);
+
+        // Sắp xếp theo thời gian tạo từ mới nhất đến cũ nhất
+        combinedFeed.sort((o1, o2) -> {
+            Instant date1 = (o1 instanceof PostDto) ? ((PostDto) o1).getCreatedate() : ((ShareDto) o1).getCreatedate();
+            Instant date2 = (o2 instanceof PostDto) ? ((PostDto) o2).getCreatedate() : ((ShareDto) o2).getCreatedate();
+            return date2.compareTo(date1); // Sắp xếp giảm dần (mới nhất trước)
+        });
+
+        return combinedFeed;
+    }
+
 
     @PostMapping("/{username}")
     public ResponseEntity<PostDto> createPost(@PathVariable String username, @RequestBody PostModel postModel) {
