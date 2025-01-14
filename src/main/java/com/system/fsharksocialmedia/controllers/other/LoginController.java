@@ -53,9 +53,7 @@ public class LoginController {
         Map<String, String> response = new HashMap<>();
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginModel.getUsername(), loginModel.getPassword()));
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginModel.getUsername(), loginModel.getPassword())
-            );
+
             if (authentication.isAuthenticated()) {
                 UserInfoDetails userDetails = (UserInfoDetails) authentication.getPrincipal();
 

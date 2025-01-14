@@ -21,9 +21,8 @@ public class AboutService {
                     String avatarUrl = user.getImages().stream()
                             .map(Image::getAvatarrurl)
                             .filter(url -> url != null && !url.isEmpty())
-                            .findFirst()
+                            .reduce((first, second) -> second)
                             .orElse("default-avatar-url");
-
                     return Map.of(
                             "username", user.getUsername(),
                             "firstname", user.getFirstname(),

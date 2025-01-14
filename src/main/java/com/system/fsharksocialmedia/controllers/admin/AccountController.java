@@ -23,8 +23,6 @@ public class AccountController {
     AccountService accountService;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private JwtService jwtService;
 
     @GetMapping("/user")
     public ResponseEntity<Page<UserDto>> getUserAccounts(

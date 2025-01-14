@@ -1,9 +1,9 @@
 package com.system.fsharksocialmedia.services.admin;
 
-import com.system.fsharksocialmedia.dtos.CommentDto;
-import com.system.fsharksocialmedia.dtos.PostDto;
-import com.system.fsharksocialmedia.dtos.UserDto;
+import com.system.fsharksocialmedia.dtos.*;
+import com.system.fsharksocialmedia.entities.Image;
 import com.system.fsharksocialmedia.entities.Post;
+import com.system.fsharksocialmedia.entities.Postimage;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.models.PostModel;
 import com.system.fsharksocialmedia.repositories.PostRepository;
@@ -43,7 +43,7 @@ public class AdminPostService {
         return convertToDto(post);
     }
 
-    public PostDto updatePost(Integer postId,PostModel postModel) {
+    public PostDto updatePost(Integer postId, PostModel postModel) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
         post.setStatus(postModel.isStatus());
@@ -57,6 +57,15 @@ public class AdminPostService {
         postDto.setCreatedate(post.getCreatedate());
         postDto.setContent(post.getContent());
         postDto.setStatus(post.getStatus());
+        if (post.getPostimages() != null) {
+            Set<PostimageDto> postimagesDto = post.getPostimages().stream().map(postimage -> {
+                PostimageDto postimageDto = new PostimageDto();
+                postimageDto.setId(postimage.getId());
+                postimageDto.setImage(postimage.getImage());
+                return postimageDto;
+            }).collect(Collectors.toSet());
+            postDto.setPostimages(postimagesDto);
+        }
         if (post.getComments() != null && !post.getComments().isEmpty()) {
             Set<CommentDto> commentDtos = post.getComments().stream().map(comment -> {
                 CommentDto commentDto = new CommentDto();
@@ -64,7 +73,6 @@ public class AdminPostService {
                 commentDto.setContent(comment.getContent());
                 commentDto.setImage(comment.getImage());
                 commentDto.setCreatedate(comment.getCreatedate());
-
                 if (comment.getUsername() != null) {
                     UserDto userDto = new UserDto();
                     userDto.setUsername(comment.getUsername().getUsername());
@@ -83,11 +91,30 @@ public class AdminPostService {
             userDto.setLastname(post.getUsername().getLastname());
             userDto.setEmail(post.getUsername().getEmail());
             postDto.setUsername(userDto);
+            if (post.getUsername().getImages() != null) {
+                List<ImageDto> imageDtos = post.getUsername().getImages().stream()
+                        .map(this::convertToImageDto)
+                        .collect(Collectors.toList());
+                userDto.setImages(imageDtos);
+            }
+            postDto.setUsername(userDto);
         }
+
         long commentCount = postRepository.countCmtByPost(post.getId());
         long likeCount = postRepository.countLikeByPost(post.getId());
         postDto.setCountComment(commentCount);
         postDto.setCountLike(likeCount);
         return postDto;
+    }
+
+    public ImageDto convertToImageDto(Image image) {
+        ImageDto imageDto = new ImageDto();
+        imageDto.setId(image.getId());
+        imageDto.setImage(image.getImage());
+        imageDto.setCreatedate(image.getCreatedate());
+        imageDto.setAvatarrurl(image.getAvatarrurl());
+        imageDto.setCoverurl(image.getCoverurl());
+        imageDto.setStatus(image.getStatus());
+        return imageDto;
     }
 }

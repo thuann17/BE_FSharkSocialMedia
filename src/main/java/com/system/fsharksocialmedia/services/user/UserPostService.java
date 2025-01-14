@@ -60,7 +60,7 @@ public class UserPostService {
         friends.add(currentUser);
 
         // Lấy tất cả bài viết của người dùng và bạn bè, sắp xếp theo ngày tạo (mới nhất -> cũ nhất)
-        List<Post> posts = postRepository.findAllByUsernameInOrderByCreatedateDesc(friends);
+        List<Post> posts = postRepository.findAllByUsernameInAndStatusTrueOrderByCreatedateDesc(friends);
 
         return posts.stream()
                 .map(post -> convertToDto(post, currentUser))
@@ -482,24 +482,19 @@ public class UserPostService {
         return shareDto;
     }
     public ImageDto convertToImageDto(Image image) {
-        // Create a new ImageDto object
         ImageDto imageDto = new ImageDto();
 
-        // Set basic properties from Image to ImageDto
         imageDto.setId(image.getId());
         imageDto.setImage(image.getImage());
         imageDto.setCreatedate(image.getCreatedate());
         imageDto.setAvatarrurl(image.getAvatarrurl());
         imageDto.setCoverurl(image.getCoverurl());
         imageDto.setStatus(image.getStatus());
-
-        // If you need to set the username (the UserDto associated with the image)
         if (image.getUsername() != null) {
             UserDto userDto = new UserDto();
             userDto.setUsername(image.getUsername().getUsername());
             userDto.setFirstname(image.getUsername().getFirstname());
             userDto.setLastname(image.getUsername().getLastname());
-            // Add any other necessary fields from User
             imageDto.setUsername(userDto);
         }
 

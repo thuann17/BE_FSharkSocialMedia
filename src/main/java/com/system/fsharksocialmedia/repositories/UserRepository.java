@@ -46,6 +46,4 @@ public interface UserRepository extends JpaRepository<User, String> {
     Page<User> findByRoles_RoleAndUsernameNot(String role, String excludedUsername, Pageable pageable);
 
     Page<User> findAllByUsernameNot(String excludedUsername, Pageable pageable);
-
-
 }

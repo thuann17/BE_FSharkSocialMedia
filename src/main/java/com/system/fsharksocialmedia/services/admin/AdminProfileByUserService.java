@@ -6,6 +6,7 @@ import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.entities.User;
 import com.system.fsharksocialmedia.entities.Userrole;
 import com.system.fsharksocialmedia.exceptions.UserNotFoundException;
+import com.system.fsharksocialmedia.models.PasswordModel;
 import com.system.fsharksocialmedia.models.UserModel;
 import com.system.fsharksocialmedia.repositories.ImageRepository;
 import com.system.fsharksocialmedia.repositories.PostRepository;
@@ -54,16 +55,16 @@ public class AdminProfileByUserService {
         }
     }
 
-    public UserDto updatePassword(String username, String oldPassword, String newPassword) {
+    public UserDto updatePassword(String username, PasswordModel model) {
         try {
             User user = userRepository.findByUsername(username).orElse(null);
             if (user == null) {
                 throw new RuntimeException("User not found.");
             }
-            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            if (!passwordEncoder.matches(model.getOldPassword(), user.getPassword())) {
                 throw new RuntimeException("Old password is incorrect.");
             }
-            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setPassword(passwordEncoder.encode(model.getNewPassword()));
             userRepository.save(user);
             return convertToDto(user);
         } catch (Exception e) {
@@ -86,7 +87,6 @@ public class AdminProfileByUserService {
     }
 
 
-
     public UserDto convertToDto(User user) {
         UserDto dto = new UserDto();
         dto.setUsername(user.getUsername());
@@ -104,23 +104,24 @@ public class AdminProfileByUserService {
             userRoleDto.setRole(user.getRoles().getRole());
             dto.setRoles(userRoleDto);
         }
-
-
+        if (user.getImages() != null) {
+            List<ImageDto> imageDtos = user.getImages().stream()
+                    .map(this::convertToImageDto)
+                    .collect(Collectors.toList());
+            dto.setImages(imageDtos);
+        }
         return dto;
     }
 
-
-
-    private Userrole convertToEntity(UserroleDto dto) {
-        Userrole userRole = new Userrole();
-        userRole.setRole(dto.getRole());
-        return userRole;
-    }
-
-    private Image convertToEntity(ImageDto dto) {
-        Image image = new Image();
-        image.setImage(dto.getImage());
-        return image;
+    public ImageDto convertToImageDto(Image image) {
+        ImageDto imageDto = new ImageDto();
+        imageDto.setId(image.getId());
+        imageDto.setImage(image.getImage());
+        imageDto.setCreatedate(image.getCreatedate());
+        imageDto.setAvatarrurl(image.getAvatarrurl());
+        imageDto.setCoverurl(image.getCoverurl());
+        imageDto.setStatus(image.getStatus());
+        return imageDto;
     }
 
     private PostDto convertPostToDto(Post post) {
