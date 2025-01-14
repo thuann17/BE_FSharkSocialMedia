@@ -78,8 +78,8 @@ public class UserPostService {
             // UserDto for the person who shared the post
             UserDto sharedBy = new UserDto();
             sharedBy.setUsername((String) record[1]);
-            sharedBy.setFirstname((String) record[12]);  // First name of the user sharing the post
-            sharedBy.setLastname((String) record[13]);   // Last name of the user sharing the post
+            sharedBy.setFirstname((String) record[12]);
+            sharedBy.setLastname((String) record[13]);
 
             ImageDto sharedByAvatar = new ImageDto();
             sharedByAvatar.setAvatarrurl((String) record[2]);
@@ -87,7 +87,10 @@ public class UserPostService {
             shareDto.setUsername(sharedBy);
 
             shareDto.setContent((String) record[3]);
-            shareDto.setCreatedate(((java.sql.Timestamp) record[4]).toInstant());
+            Timestamp timestamp = (Timestamp) record[4];
+
+            Instant instant = timestamp.toInstant();
+            shareDto.setCreatedate(instant);
 
             // PostDto for the shared post
             PostDto postDto = new PostDto();
@@ -96,7 +99,7 @@ public class UserPostService {
             // UserDto for the post author
             UserDto postAuthor = new UserDto();
             postAuthor.setUsername((String) record[6]);
-            postAuthor.setFirstname((String) record[14]);  // First name of the post author
+            postAuthor.setFirstname((String) record[14]);
             postAuthor.setLastname((String) record[15]);   // Last name of the post author
 
             ImageDto postAuthorAvatar = new ImageDto();
@@ -105,7 +108,7 @@ public class UserPostService {
             postDto.setUsername(postAuthor);
 
             postDto.setContent((String) record[8]);
-            postDto.setCreatedate(((java.sql.Timestamp) record[9]).toInstant());
+
             postDto.setStatus((Boolean) record[10]);
 
             // Post image (if any)
@@ -156,13 +159,13 @@ public class UserPostService {
         PostDto postDto = new PostDto();
         postDto.setId(postid.getId());
         postDto.setContent(postid.getContent());
-        postDto.setCreatedate(postid.getCreatedate());
+        postDto.setCreatedate(Instant.now());
         // Add any other required fields here
 
         savedShareDto.setPost(postDto);
 
         savedShareDto.setContent(savedShare.getContent());
-        savedShareDto.setCreatedate(savedShare.getCreatedate());
+        savedShareDto.setCreatedate(Instant.now());
 
         return savedShareDto;
     }

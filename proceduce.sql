@@ -189,4 +189,8 @@ EXEC GetPlaceDetailsWithImages;
 
 
 
+EXEC GetSharesByFriend @username = 'thuyvytran';
+
+
+
 
