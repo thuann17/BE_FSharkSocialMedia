@@ -15,8 +15,8 @@ public class TripDto implements Serializable {
     Integer id;
     @Size(max = 500)
     String tripname;
-    LocalDate startdate;
-    LocalDate enddate;
+    Instant startdate;
+    Instant enddate;
     Instant createdate;
     String description;
     private List<UserDto> users;

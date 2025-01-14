@@ -19,6 +19,7 @@ public class MessageModel {
     private String parentMessageId;
     private boolean isReal = false;
     private String urlImage;
+    private String type;
     private boolean isDeletedBySender = false;
     private boolean isDeletedByReceiver = false;
 

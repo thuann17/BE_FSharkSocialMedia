@@ -26,10 +26,10 @@ public class Trip {
     private String tripname;
 
     @Column(name = "STARTDATE")
-    private LocalDate startdate;
+    private Instant startdate;
 
     @Column(name = "ENDDATE")
-    private LocalDate enddate;
+    private Instant enddate;
 
     @Column(name = "CREATEDATE")
     private Instant createdate;

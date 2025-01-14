@@ -2,9 +2,9 @@ package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
+import com.system.fsharksocialmedia.models.PlaceTripModel;
 import com.system.fsharksocialmedia.models.TripModel;
 import com.system.fsharksocialmedia.repositories.*;
-import com.system.fsharksocialmedia.services.other.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,32 +12,78 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Service
 public class TripService {
 
     @Autowired
     private TripRepository tripRepository;
     @Autowired
-    private UserInfoService userInfoService;
-    @Autowired
     private UserRepository userRepository;
     @Autowired
-    private UsertripRepository usertripRepository;
+    private PlacetripRepository tripPlaceRepository;
+    @Autowired
+    private PlaceRepository placeRepository;
     @Autowired
     private TriproleRepository triproleRepository;
     @Autowired
-    private PlacetripRepository placetripRepository;
-    @Autowired
-    private PlaceimageRepository placetimageRepository;
-    @Autowired
-    private PlaceRepository placeRepository;
+    private UsertripRepository usertripRepository;
+
+    public PlacetripDto createTrip(String username, int placeId, PlaceTripModel placeTripModel) {
+        try {
+            Place place = placeRepository.findById(placeId).orElse(null);
+            User user = userRepository.findById(username).orElse(null);
+            Triprole triprole = triproleRepository.findById(1).orElse(null);
+
+            if (place == null || user == null || triprole == null) {
+                throw new IllegalArgumentException("Invalid place, user, or role.");
+            }
+
+            Trip newTrip = new Trip();
+            newTrip.setTripname(placeTripModel.getTripName());
+            newTrip.setStartdate(placeTripModel.getStartDate());
+            newTrip.setEnddate(placeTripModel.getEndDate());
+            newTrip.setCreatedate(Instant.now());
+            newTrip.setDescription(placeTripModel.getDescription());
+            Trip savedTrip = tripRepository.save(newTrip);
+
+            Usertrip userTrip = new Usertrip();
+            userTrip.setRole(triprole);
+            userTrip.setUserid(user);
+            userTrip.setId(userTrip.getId());
+            userTrip.setTripid(savedTrip);
+            usertripRepository.save(userTrip);
+
+            Placetrip tripPlace = new Placetrip();
+            tripPlace.setDatetime(Instant.now());
+            tripPlace.setNote(placeTripModel.getNote());
+            tripPlace.setPlaceid(place);
+            tripPlace.setTripid(savedTrip);
+
+            Placetrip savedTripPlace = tripPlaceRepository.save(tripPlace);
+
+            return convertToPlaceTripDto(savedTripPlace);
+        } catch (RuntimeException e) {
+            throw new RuntimeException();
+
+        }
+    }
+
+    public PlacetripDto convertToPlaceTripDto(Placetrip tripPlace) {
+        PlacetripDto tripPlaceDto = new PlacetripDto();
+        tripPlaceDto.setId(tripPlace.getId());
+        tripPlaceDto.setTripid(tripPlace.getTripid());
+        tripPlaceDto.setDatetime(tripPlace.getDatetime());
+        tripPlaceDto.setNote(tripPlace.getNote());
+        return tripPlaceDto;
+    }
 
     public List<TripDto> getTripsByUsername(String username) {
         User user = userRepository.findById(username).orElse(null);
-
-        List<Trip> trip = tripRepository.findTripsByUsernameAndPlaceId(username);
-        return trip.stream().map(this::convertToTripDto).collect(Collectors.toList());
+        if (user == null) {
+            throw new IllegalArgumentException("User not found.");
+        }
+        List<Trip> trips = tripRepository.findTripsByUsernameAndPlaceId(username);
+        return trips.stream().map(this::convertToTripDto).collect(Collectors.toList());
     }
 
     public ImageDto convertToImageDto(Image image) {
@@ -52,10 +98,10 @@ public class TripService {
     }
 
     public PlaceimageDto convertToPlaceImageDto(Placeimage image) {
-        PlaceimageDto placeimage = new PlaceimageDto();
-        placeimage.setId(image.getId());
-        placeimage.setImage(image.getImage());
-        return placeimage;
+        PlaceimageDto placeimageDto = new PlaceimageDto();
+        placeimageDto.setId(image.getId());
+        placeimageDto.setImage(image.getImage());
+        return placeimageDto;
     }
 
     public UserDto convertToUserDto(User user) {
@@ -71,23 +117,24 @@ public class TripService {
         userDto.setCurrency(user.getCurrency());
         userDto.setGender(user.getGender());
         userDto.setBirthday(user.getBirthday());
+
         if (user.getRoles() != null) {
             UserroleDto userroleDto = new UserroleDto();
             userroleDto.setId(user.getRoles().getId());
             userroleDto.setRole(user.getRoles().getRole());
             userDto.setRoles(userroleDto);
         }
+
         if (user.getImages() != null && !user.getImages().isEmpty()) {
-            List<ImageDto> imageDtos = new ArrayList<>();
-            for (Image image : user.getImages()) {
-                ImageDto imageDto = convertToImageDto(image);
-                imageDtos.add(imageDto);
-            }
+            List<ImageDto> imageDtos = user.getImages().stream()
+                    .map(this::convertToImageDto)
+                    .collect(Collectors.toList());
             userDto.setImages(imageDtos);
         }
         return userDto;
     }
 
+    // Convert Usertrip entity to UsertripDto
     public UsertripDto convertToUsertripDto(Usertrip usertrip) {
         UsertripDto usertripDto = new UsertripDto();
         usertripDto.setId(usertrip.getId());
@@ -104,76 +151,42 @@ public class TripService {
         tripDto.setEnddate(trip.getEnddate());
         tripDto.setCreatedate(trip.getCreatedate());
         tripDto.setDescription(trip.getDescription());
+
         if (trip.getUsertrips() != null && !trip.getUsertrips().isEmpty()) {
-            List<UserDto> userDtos = new ArrayList<>();
-            for (Usertrip usertrip : trip.getUsertrips()) {
-                if (usertrip.getUserid() != null) {
-                    User user = usertrip.getUserid();
-                    UserDto userDto = new UserDto();
-                    userDto.setFirstname(user.getFirstname());
-                    userDto.setLastname(user.getLastname());
-                    if (user.getImages() != null && !user.getImages().isEmpty()) {
-                        List<ImageDto> imageDtos = new ArrayList<>();
-                        for (Image image : user.getImages()) {
-                            ImageDto imageDto = convertToImageDto(image);
-                            imageDtos.add(imageDto);
-                        }
-                        userDto.setImages(imageDtos);
-                    }
-                    userDtos.add(userDto);
-                }
-            }
+            List<UserDto> userDtos = trip.getUsertrips().stream()
+                    .map(usertrip -> convertToUserDto(usertrip.getUserid()))
+                    .collect(Collectors.toList());
             tripDto.setUsers(userDtos);
         }
-        // Chuyển đổi danh sách Place (PlaceDto)
-        if (trip.getPlacetrips() != null && !trip.getPlacetrips().isEmpty()) {
-            List<PlaceDto> placeDtos = new ArrayList<>();
-            for (Placetrip placetrip : trip.getPlacetrips()) {
-                if (placetrip.getPlaceid() != null) {
-                    Place place = placetrip.getPlaceid();
-                    PlaceDto placeDto = new PlaceDto();
-                    placeDto.setId(place.getId());
-                    placeDto.setNameplace(place.getNameplace());
-                    placeDto.setUrlmap(place.getUrlmap());
-                    placeDto.setAddress(place.getAddress());
-                    placeDto.setDescription(place.getDescription());
-                    placeDtos.add(placeDto);
-                    if (place.getPlaceimages() != null && !place.getPlaceimages().isEmpty()) {
-                        Set<PlaceimageDto> imageDtos = new LinkedHashSet<>();  // Sử dụng Set thay vì List
-                        for (Placeimage image : place.getPlaceimages()) {
-                            PlaceimageDto imageDto = convertToPlaceImageDto(image);
-                            imageDtos.add(imageDto);
-                        }
-                        placeDto.setPlaceimages(imageDtos);
-                    }
-                }
-            }
 
+        if (trip.getPlacetrips() != null && !trip.getPlacetrips().isEmpty()) {
+            List<PlaceDto> placeDtos = trip.getPlacetrips().stream()
+                    .map(placetrip -> {
+                        PlaceDto placeDto = new PlaceDto();
+                        placeDto.setId(placetrip.getPlaceid().getId());
+                        placeDto.setNameplace(placetrip.getPlaceid().getNameplace());
+                        placeDto.setUrlmap(placetrip.getPlaceid().getUrlmap());
+                        placeDto.setAddress(placetrip.getPlaceid().getAddress());
+                        placeDto.setDescription(placetrip.getPlaceid().getDescription());
+
+                        // Map place images
+                        Set<PlaceimageDto> placeImages = placetrip.getPlaceid().getPlaceimages().stream()
+                                .map(this::convertToPlaceImageDto)
+                                .collect(Collectors.toSet());
+                        placeDto.setPlaceimages(placeImages);
+
+                        return placeDto;
+                    })
+                    .collect(Collectors.toList());
             tripDto.setPlaces(placeDtos);
         }
-
-        // Chuyển đổi danh sách Placetrip (PlacetripDto)
         if (trip.getPlacetrips() != null && !trip.getPlacetrips().isEmpty()) {
-            List<PlacetripDto> placetripDtos = new ArrayList<>();
-            for (Placetrip placetrip : trip.getPlacetrips()) {
-                PlacetripDto placetripDto = new PlacetripDto();
-                placetripDto.setId(placetrip.getId());
-                placetripDto.setDatetime(placetrip.getDatetime());
-                placetripDto.setNote(placetrip.getNote());
-
-                // Thêm thông tin Place vào PlacetripDto
-                if (placetrip.getPlaceid() != null) {
-                    PlaceDto placeDto = new PlaceDto();
-                    placeDto.setId(placetrip.getPlaceid().getId());
-                    placeDto.setNameplace(placetrip.getPlaceid().getNameplace());
-                    placetripDto.setPlaceid(placeDto);
-                }
-
-                placetripDtos.add(placetripDto);
-            }
+            List<PlacetripDto> placetripDtos = trip.getPlacetrips().stream()
+                    .map(this::convertToPlaceTripDto)
+                    .collect(Collectors.toList());
             tripDto.setPlaceTrips(placetripDtos);
         }
+
         return tripDto;
     }
-
 }

@@ -45,10 +45,8 @@ public class PlaceService {
             // Handle case where addressFilter is null or empty
             return Collections.emptyList();
         }
-
         // Fetch results from the repository using a stored procedure or custom query
         List<Object[]> results = placeRepository.getPlaceDetailsWithImages();
-
         return results.stream()
                 .filter(result -> {
                     // Extract address from the result (ensure the correct index for address)
@@ -86,6 +84,4 @@ public class PlaceService {
                 })
                 .collect(Collectors.toList());
     }
-
-
 }

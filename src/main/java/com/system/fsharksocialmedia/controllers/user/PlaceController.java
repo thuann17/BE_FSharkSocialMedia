@@ -21,7 +21,6 @@ public class PlaceController {
     @GetMapping
     public ResponseEntity<List<PlaceDto>> getPlaceDetailsWithImages(
             @RequestParam(value = "addressFilter", required = false) String addressFilter) {
-
         List<PlaceDto> places = placeService.getPlaceDetailsWithImages(addressFilter);
         return ResponseEntity.ok(places);
     }

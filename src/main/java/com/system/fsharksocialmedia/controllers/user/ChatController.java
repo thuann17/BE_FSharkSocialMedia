@@ -41,14 +41,6 @@ public class ChatController {
         return chatService.saveMessage(chatMessage);
     }
 
-//    @PostMapping("/reply")
-//    public ResponseEntity<?> sendReply(@RequestBody MessageModel message, @RequestParam String parentMessageId) {
-//        // Lưu thông tin tin nhắn trả lời vào cơ sở dữ liệu
-//        message.setParentMessageId(parentMessageId); // Gắn parentMessageId vào tin nhắn trả lời
-//        chatService.sendReply(message, parentMessageId); // Xử lý gửi tin nhắn trả lời
-//        return ResponseEntity.ok().build();
-//    }
-
     // check soạn tin
     @MessageMapping("/chat.typing")
     public void typing(@Payload MessageModel chatMessage) {
@@ -61,7 +53,8 @@ public class ChatController {
             // Cập nhật trạng thái tin nhắn đã xem
             MessageModel message = messageMongoReps.findById(String.valueOf(chatMessage.getId())).orElse(null);
             if (message != null) {
-                message.setReal(true); // Đánh dấu đã xem
+                message.setReal(true);
+
                 messageMongoReps.save(message);
 
                 // Gửi thông báo qua WebSocket tới người gửi
@@ -81,13 +74,7 @@ public class ChatController {
         return ResponseEntity.ok(unreadMessages);
     }
 
-    // xoá tin nhắn
-    //    @DeleteMapping("/api/deleteMessages")
-    //    public String deleteMessages(@RequestParam String user1, @RequestParam String user2, @RequestParam String currentUser) {
-    //        chatService.deleteMessagesForUser(user1, user2, currentUser);
-    //        System.out.println("xoas ");
-    //        return "Messages deleted successfully for " + currentUser;
-    //    }
+
     // Xử lý khi người dùng tham gia
     //    @MessageMapping("/chat.addUser")
     //    @SendTo("/topic/public")

@@ -41,6 +41,7 @@ public class ChatService {
             chatMessage.setDeletedBySender(false);
             chatMessage.setDeletedByReceiver(false);
             chatMessage.setReal(false);
+            chatMessage.setType(chatMessage.getType());
             messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getSender(), chatMessage);
             messageMongoReps.save(chatMessage);
         } catch (Exception e) {
@@ -49,30 +50,7 @@ public class ChatService {
         }
         return chatMessage;
     }
-
-    public void sendReply(MessageModel model, String parentMessageId) {
-        MessageModel chatMessage = messageMongoReps.findById(model.getParentMessageId()).orElse(null);
-        chatMessage.setParentMessageId(parentMessageId);
-        try {
-            if (chatMessage.getUrlImage() == null) {
-                chatMessage.setUrlImage("");
-            } else {
-                chatMessage.setUrlImage(chatMessage.getUrlImage());
-            }
-            chatMessage.setTime(Instant.now());
-            chatMessage.setDeletedBySender(false);
-            chatMessage.setDeletedByReceiver(false);
-            chatMessage.setReal(false);
-
-            messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getSender(), chatMessage);
-            messageMongoReps.save(chatMessage);
-        } catch (Exception e) {
-            System.err.println("Error saving message to DB: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    public List<MessageDto> getUnreadMessages(String receiver) {
+        public List<MessageDto> getUnreadMessages(String receiver) {
         List<MessageModel> unreadMessages = messageMongoReps.findByReceiverAndReal(receiver, false);
         return unreadMessages.stream().map(this::convertToDto).collect(Collectors.toList());
     }
@@ -87,6 +65,7 @@ public class ChatService {
         messageDto.setTime(messageMongo.getTime());
         messageDto.setUrlImage(messageMongo.getUrlImage());
         messageDto.setReal(messageMongo.isReal());
+        messageDto.setType(messageMongo.getType());
         return messageDto;
     }
 }
