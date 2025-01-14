@@ -1,5 +1,6 @@
 package com.system.fsharksocialmedia.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -21,9 +22,7 @@ public class Trip {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @Size(max = 500)
-    @Nationalized
-    @Column(name = "TRIPNAME", length = 500)
+    @Column(name = "TRIPNAME")
     private String tripname;
 
     @Column(name = "STARTDATE")
@@ -40,9 +39,11 @@ public class Trip {
     private String description;
 
     @OneToMany(mappedBy = "tripid")
+    @JsonManagedReference
     private Set<Placetrip> placetrips = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "tripid")
+    @JsonManagedReference
     private Set<Usertrip> usertrips = new LinkedHashSet<>();
 
 }

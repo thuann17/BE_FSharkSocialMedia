@@ -63,28 +63,28 @@ public class PlaceService {
                     // Map fields from result array to PlaceDto
                     placeDto.setId((Integer) result[0]);
                     placeDto.setNameplace((String) result[1]);
-                    placeDto.setAddress((String) result[2]);  // Ensure correct index for address
-                    placeDto.setDescription((String) result[3]); // Ensure correct index for description
+                    placeDto.setAddress((String) result[2]);
+                    placeDto.setDescription((String) result[3]);
 
                     // Fetch images for the place from the repository
                     Place place = new Place();
                     place.setId(placeDto.getId());
                     List<Placeimage> placeImages = placeimageRepository.findByPlaceid(place);
 
-                    // Convert Placeimage entities to PlaceimageDto
+
                     for (Placeimage placeImage : placeImages) {
                         PlaceimageDto placeimageDto = new PlaceimageDto();
                         placeimageDto.setId(placeImage.getId());
                         placeimageDto.setPlaceid(convertToDto(placeImage.getPlaceid())); // Convert Place to PlaceDto
                         placeimageDto.setImage(placeImage.getImage());
 
-                        placeImageDtos.add(placeimageDto); // Add image DTO to the set
+                        placeImageDtos.add(placeimageDto);
                     }
 
-                    placeDto.setPlaceimages(placeImageDtos); // Set images for the place
-                    return placeDto; // Return the populated PlaceDto
+                    placeDto.setPlaceimages(placeImageDtos);
+                    return placeDto;
                 })
-                .collect(Collectors.toList()); // Collect the result into a list
+                .collect(Collectors.toList());
     }
 
 

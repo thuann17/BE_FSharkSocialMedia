@@ -1,5 +1,6 @@
 package com.system.fsharksocialmedia.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class Usertrip {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TRIPID")
+    @JsonBackReference
     private Trip tripid;
 
     @ManyToOne(fetch = FetchType.LAZY)
