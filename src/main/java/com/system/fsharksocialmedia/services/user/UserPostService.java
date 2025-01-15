@@ -439,6 +439,12 @@ public class UserPostService {
         userDto.setFirstname(comment.getUsername().getFirstname());
         userDto.setLastname(comment.getUsername().getLastname());
 
+        List<ImageDto> imageDtos = comment.getUsername().getImages().stream()
+                .map(this::convertToImageDto) // Convert Image to ImageDto
+                .collect(Collectors.toList()); // Collect into a List<ImageDto>
+        userDto.setImages(imageDtos);
+
+
         // Set UserDto to PostDto
         commentDto.setUsername(userDto);
 

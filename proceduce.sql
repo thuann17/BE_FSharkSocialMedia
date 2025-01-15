@@ -193,14 +193,18 @@ EXEC GetSharesByFriend @username = 'thuyvytran';
 
 
 
-CREATE PROCEDURE GetTripStartDates
+CREATE OR Alter PROCEDURE GetTripStartDates
 AS
 BEGIN
     SET NOCOUNT ON;
 
     SELECT [ID], [TRIPNAME], [STARTDATE]
     FROM [FShark_V2].[dbo].[TRIPS]
+	
     ORDER BY [STARTDATE] ASC;
 END;
 
 
+EXEC GetTripStartDates;
+
+select * from users

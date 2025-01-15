@@ -101,9 +101,9 @@ public class UserInfoService implements UserDetailsService {
         us.setLastname(model.getLastname());
         us.setFirstname(model.getFirstname());
         us.setBirthday(model.getBirthday());
-        us.setBio(model.getBio());
-        us.setHometown(model.getHometown());
-        us.setCurrency(model.getCurrency());
+        us.setBio("Xin chào");
+        us.setHometown("Chưa cập nhật");
+        us.setCurrency("Chưa cập nhật");
         Userrole role = userroleRepository.findById(2)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + model.getRoleId()));
         us.setRoles(role);
@@ -162,9 +162,9 @@ public class UserInfoService implements UserDetailsService {
         us.setLastname(model.getLastname());
         us.setFirstname(model.getFirstname());
         us.setBirthday(model.getBirthday());
-        us.setBio(model.getBio());
-        us.setHometown(model.getHometown());
-        us.setCurrency(model.getCurrency());
+        us.setBio("Xin chào");
+        us.setHometown("Chưa cập nhật");
+        us.setCurrency("Chưa cập nhật");
         Userrole role = userroleRepository.findById(1)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + model.getRoleId()));
         us.setRoles(role);
