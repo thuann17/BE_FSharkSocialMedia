@@ -7,6 +7,7 @@ import com.system.fsharksocialmedia.models.TripModel;
 import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -25,6 +26,10 @@ public class TripService {
     private PlaceRepository placeRepository;
     @Autowired
     private TriproleRepository triproleRepository;
+    @Autowired
+    private UsertripRepository userTripRepository;
+    @Autowired
+    private PlacetripRepository placeTripRepository;
     @Autowired
     private UsertripRepository usertripRepository;
 
@@ -76,6 +81,21 @@ public class TripService {
         return trips.stream().map(this::convertToTripDto).collect(Collectors.toList());
     }
 
+    @Transactional
+    public void deleteTrip(Integer tripID) {
+        Trip trip = tripRepository.findById(tripID)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chuyến đi" +tripID));
+
+        // Xóa Comment liên quan
+        userTripRepository.deleteByTripid(trip);
+
+        placeTripRepository.deleteByTripid(trip);
+
+        tripRepository.delete(trip);
+    }
+
+
+
     public ImageDto convertToImageDto(Image image) {
         ImageDto imageDto = new ImageDto();
         imageDto.setId(image.getId());
@@ -116,6 +136,7 @@ public class TripService {
 
     public TripDto convertToTripDto(Trip trip) {
         TripDto tripDto = new TripDto();
+        tripDto.setTripid(trip.getId());
         tripDto.setTripname(trip.getTripname());
         tripDto.setStartdate(trip.getStartdate());
         tripDto.setEnddate(trip.getEnddate());

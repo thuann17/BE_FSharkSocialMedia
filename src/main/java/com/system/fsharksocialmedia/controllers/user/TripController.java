@@ -30,4 +30,10 @@ public class TripController {
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(tripService.createTrip(username, placeTripModel.getPlaceId(), placeTripModel));
     }
+
+        @DeleteMapping("1/{tripId}")
+    public ResponseEntity<Integer> deleteTrip(@PathVariable Integer tripId) {
+        tripService.deleteTrip(tripId);
+        return ResponseEntity.noContent().build();
+    }
 }

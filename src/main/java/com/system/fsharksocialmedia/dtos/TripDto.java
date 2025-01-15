@@ -9,6 +9,7 @@ import java.util.Set;
 
 @Data
 public class TripDto implements Serializable {
+    Integer tripid;
     String tripname;
     Instant startdate;
     Instant enddate;

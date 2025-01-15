@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface PlacetripRepository extends JpaRepository<Placetrip, Integer> {
     Placetrip findPlacetripByPlaceidAndTripid(Place placeid, Trip tripid);
+
+    void deleteByTripid(Trip trip);
 }
