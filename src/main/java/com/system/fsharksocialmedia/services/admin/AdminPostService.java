@@ -58,13 +58,13 @@ public class AdminPostService {
         postDto.setContent(post.getContent());
         postDto.setStatus(post.getStatus());
         if (post.getPostimages() != null) {
-            Set<PostimageDto> postimagesDto = post.getPostimages().stream().map(postimage -> {
+            List<PostimageDto> postimagesDto = post.getPostimages().stream().map(postimage -> {
                 PostimageDto postimageDto = new PostimageDto();
                 postimageDto.setId(postimage.getId());
                 postimageDto.setImage(postimage.getImage());
                 return postimageDto;
-            }).collect(Collectors.toSet());
-            postDto.setPostimages((List<PostimageDto>) postimagesDto);
+            }).collect(Collectors.toList());
+            postDto.setPostimages(postimagesDto);
         }
         if (post.getComments() != null && !post.getComments().isEmpty()) {
             Set<CommentDto> commentDtos = post.getComments().stream().map(comment -> {

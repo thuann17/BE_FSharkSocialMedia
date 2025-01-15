@@ -1,5 +1,6 @@
 package com.system.fsharksocialmedia.controllers.admin;
 
+import com.system.fsharksocialmedia.dtos.ImageDto;
 import com.system.fsharksocialmedia.dtos.PostDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.models.PasswordModel;
@@ -41,8 +42,10 @@ public class AdminProfileByUserController {
         return ResponseEntity.ok().body(adminProfileByUserService.updatePassword(username, model));
     }
 
-    @PutMapping("/{username}/uImage")
-    public ResponseEntity<UserDto> updateImage(@PathVariable String username, @RequestBody UserModel avatarUrl) {
+    @PostMapping("/{username}/uImage")
+    public ResponseEntity<ImageDto> updateImage(@PathVariable String username, @RequestParam String avatarUrl) {
+        System.out.println("lưu thành công");
         return ResponseEntity.ok().body(adminProfileByUserService.updateImage(username, avatarUrl));
     }
+
 }

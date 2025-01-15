@@ -29,6 +29,8 @@ public class FriendService {
     @Autowired // This line ensures userService is injected
     private UserService userService;
 
+    private List<FriendDto> friendships;
+
     // Convert from entity to DTO
     public FriendDto toDto(Friend friend) {
         if (friend == null) {
@@ -164,6 +166,21 @@ public class FriendService {
     public void deleteFriendRequest(Integer id) {
         Friend friendrequest = friendRepository.findById(id).orElseThrow(() -> new RuntimeException("Friend request not found"));
         friendRepository.delete(friendrequest);
+    }
+
+
+    public boolean areFriends(UserDto userTarget, UserDto usersRC) {
+        // Kiểm tra nếu user1 và user2 là bạn bè trong danh sách
+        Optional<FriendDto> friendship = friendships.stream()
+                .filter(f ->
+                        (f.getUserSrc().getUsername().equals(userTarget.getUsername()) &&
+                                f.getUserTarget().getUsername().equals(usersRC.getUsername())) ||
+                                (f.getUserSrc().getUsername().equals(usersRC.getUsername()) &&
+                                        f.getUserTarget().getUsername().equals(userTarget.getUsername())))
+                .findFirst();
+
+        // Nếu tìm thấy quan hệ bạn bè, kiểm tra trạng thái
+        return friendship.isPresent() && friendship.get().getStatus();
     }
 
 }
