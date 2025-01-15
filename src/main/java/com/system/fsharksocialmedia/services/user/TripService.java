@@ -9,7 +9,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -107,6 +110,25 @@ public class TripService {
             System.err.println("Error while deleting trip: " + e.getMessage());
             throw new RuntimeException("Lỗi khi xóa chuyến đi: " + tripID, e);
         }
+    }
+
+    @Transactional
+    public List<TripDto> getTripStartDates() {
+        List<Object[]> results = tripRepository.getTripStartDates();
+        List<TripDto> tripDtos = new ArrayList<>();
+
+        for (Object[] result : results) {
+            TripDto tripDto = new TripDto();
+            tripDto.setTripid((Integer) result[0]);
+            tripDto.setTripname((String) result[1]);
+
+            // Convert Timestamp to Instant
+            tripDto.setStartdate(((Timestamp) result[2]).toInstant());
+
+            tripDtos.add(tripDto);
+        }
+
+        return tripDtos;
     }
 
 
