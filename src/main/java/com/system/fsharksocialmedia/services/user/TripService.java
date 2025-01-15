@@ -5,6 +5,7 @@ import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.PlaceTripModel;
 import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,42 +69,17 @@ public class TripService {
         }
     }
 
-//    public PlacetripDto updateTrip(Integer tripId, String username, int placeId, PlaceTripModel placeTripModel) {
-//        try {
-//            Trip trip = tripRepository.findById(tripId).orElse(null);
-//            Place place = placeRepository.findById(placeId).orElse(null);
-//            User user = userRepository.findById(username).orElse(null);
-//            Triprole triprole = triproleRepository.findById(1).orElse(null);
-//            if (place == null || user == null || triprole == null || trip == null) {
-//                throw new IllegalArgumentException("Invalid place, user, role, or trip.");
-//            }
-//
-//            trip.setTripname(placeTripModel.getTripName());
-//            trip.setStartdate(placeTripModel.getStartDate());
-//            trip.setEnddate(placeTripModel.getEndDate());
-//            trip.setDescription(placeTripModel.getDescription());
-//            Trip updatedTrip = tripRepository.save(trip);
-//
-//            Usertrip userTrip = usertripRepository.findByUseridAndTripid(user.getId(), updatedTrip.getId());
-//            if (userTrip != null) {
-//                userTrip.setRole(triprole);
-//                usertripRepository.save(userTrip);
-//            }
-//
-//            Placetrip tripPlace = tripPlaceRepository.findByTripidAndPlaceid(updatedTrip.getId(), place.getId());
-//            if (tripPlace != null) {
-//                tripPlace.setNote(placeTripModel.getNote()); // Update note if needed
-//                tripPlace.setDatetime(Instant.now()); // Update timestamp for the trip-place relation
-//                Placetrip updatedTripPlace = tripPlaceRepository.save(tripPlace);
-//                return convertToPlaceTripDto(updatedTripPlace);
-//            } else {
-//                throw new IllegalArgumentException("Trip-place relation not found.");
-//            }
-//
-//        } catch (RuntimeException e) {
-//            throw new RuntimeException("Error updating trip.", e);
-//        }
-//    }
+    public TripDto updateTrip(Integer tripId, PlaceTripModel placeTripModel) {
+        try {
+            Trip trip = tripRepository.findById(tripId).orElse(null);
+            trip.setEnddate(placeTripModel.getEndDate());
+            trip.setDescription(placeTripModel.getDescription());
+            Trip savedTrip = tripRepository.save(trip);
+            return convertToTripDto(savedTrip);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error updating trip.", e);
+        }
+    }
 
 
     public List<TripDto> getTripsByUsername(String username) {
@@ -116,18 +92,22 @@ public class TripService {
     }
 
     @Transactional
-    public void deleteTrip(Integer tripID) {
-        Trip trip = tripRepository.findById(tripID)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy chuyến đi" +tripID));
-
-        // Xóa Comment liên quan
-        userTripRepository.deleteByTripid(trip);
-
-        placeTripRepository.deleteByTripid(trip);
-
-        tripRepository.delete(trip);
+    public String deleteTrip(Integer tripID) {
+        try {
+            System.out.println("Deleting trip " + tripID);
+            Trip trip = tripRepository.findById(tripID)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy chuyến đi với ID: " + tripID));
+            Usertrip usertrip = userTripRepository.findUsertripByTripid(trip);
+            Placetrip tripPlace = tripPlaceRepository.findPlacetripByTripid(trip);
+            userTripRepository.delete(usertrip);
+            placeTripRepository.delete(tripPlace);
+            tripRepository.delete(trip);
+            return "success";
+        } catch (RuntimeException e) {
+            System.err.println("Error while deleting trip: " + e.getMessage());
+            throw new RuntimeException("Lỗi khi xóa chuyến đi: " + tripID, e);
+        }
     }
-
 
 
     public ImageDto convertToImageDto(Image image) {
@@ -218,6 +198,7 @@ public class TripService {
 
         return placeimageDto;
     }
+
     public PlaceDto convertToPlaceDto(Place place) {
         PlaceDto placeDto = new PlaceDto();
         placeDto.setId(place.getId());

@@ -5,6 +5,7 @@ import com.system.fsharksocialmedia.dtos.TripDto;
 import com.system.fsharksocialmedia.models.PlaceTripModel;
 import com.system.fsharksocialmedia.services.user.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.Banner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +32,15 @@ public class TripController {
         return ResponseEntity.status(HttpStatus.CREATED).body(tripService.createTrip(username, placeTripModel.getPlaceId(), placeTripModel));
     }
 
-        @DeleteMapping("delete/{tripId}")
-    public ResponseEntity<Integer> deleteTrip(@PathVariable Integer tripId) {
+    @PutMapping("/{tripId}")
+    public ResponseEntity<TripDto> updateTrip(
+            @PathVariable Integer tripId, @RequestBody PlaceTripModel model
+    ) {
+        return ResponseEntity.ok().body(tripService.updateTrip(tripId, model));
+    }
+
+    @DeleteMapping("/delete/{tripId}")
+    public ResponseEntity<String> deleteTrip(@PathVariable Integer tripId) {
         tripService.deleteTrip(tripId);
         return ResponseEntity.noContent().build();
     }

@@ -11,7 +11,5 @@ import java.util.List;
 public interface UsertripRepository extends JpaRepository<Usertrip, Integer> {
     List<Usertrip> findByUserid(User user);
 
-    void deleteByTripid(Trip tripId);
-
-
+    Usertrip findUsertripByTripid(Trip tripid);
 }
