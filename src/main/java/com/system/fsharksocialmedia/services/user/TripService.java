@@ -3,7 +3,6 @@ package com.system.fsharksocialmedia.services.user;
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.PlaceTripModel;
-import com.system.fsharksocialmedia.models.TripModel;
 import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,11 +57,9 @@ public class TripService {
             tripPlace.setPlaceid(place);
             tripPlace.setTripid(savedTrip);
             Placetrip savedTripPlace = tripPlaceRepository.save(tripPlace);
-
             return convertToPlaceTripDto(savedTripPlace);
         } catch (RuntimeException e) {
             throw new RuntimeException();
-
         }
     }
 

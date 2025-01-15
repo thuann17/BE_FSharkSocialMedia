@@ -7,6 +7,7 @@ import com.system.fsharksocialmedia.models.PostModel;
 import com.system.fsharksocialmedia.models.ShareModel;
 import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +46,8 @@ public class UserPostService {
     @Autowired
     private PostimageRepository postimageRepository;
 
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     public List<PostDto> getPostsByFriends(String username) {
         User currentUser = userRepository.findByUsername(username)
@@ -290,6 +293,7 @@ public class UserPostService {
         Likepost likePost = new Likepost();
         likePost.setUsername(user);
         likePost.setPost(post);
+        simpMessagingTemplate.convertAndSend("/topic/post/" + postId, "User " + username + " liked your post.");
         Likepost savedLikePost = likepostRepository.save(likePost);
         return convertToLikepostDto(savedLikePost);
     }
