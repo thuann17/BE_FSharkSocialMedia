@@ -10,7 +10,7 @@ import java.time.Instant;
 @Data
 public class NotificationDto implements Serializable {
     Integer id;
-    UserDto username;
+    String username;
     @Size(max = 500)
     String content;
     TypeDto type;
