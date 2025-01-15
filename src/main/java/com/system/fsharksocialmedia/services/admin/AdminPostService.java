@@ -64,7 +64,7 @@ public class AdminPostService {
                 postimageDto.setImage(postimage.getImage());
                 return postimageDto;
             }).collect(Collectors.toSet());
-            postDto.setPostimages(postimagesDto);
+            postDto.setPostimages((List<PostimageDto>) postimagesDto);
         }
         if (post.getComments() != null && !post.getComments().isEmpty()) {
             Set<CommentDto> commentDtos = post.getComments().stream().map(comment -> {

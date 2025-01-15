@@ -119,7 +119,9 @@ public class UserPostService {
             // Post image (if any)
             PostimageDto postImage = new PostimageDto();
             postImage.setImage((String) record[11]);
-            postDto.setPostimages(Set.of(postImage));
+
+            // Wrap postImage in a List
+            postDto.setPostimages(List.of(postImage));
 
             shareDto.setPost(postDto);
 
@@ -156,7 +158,6 @@ public class UserPostService {
         userDto.setUsername(currentUser.getUsername());
         userDto.setFirstname(currentUser.getFirstname());
         userDto.setLastname(currentUser.getLastname());
-        // Add any other required fields here
 
         savedShareDto.setUsername(userDto);
 
@@ -399,7 +400,10 @@ public class UserPostService {
 
         // Convert Postimages
         postDto.setPostimages(post.getPostimages() != null ?
-                post.getPostimages().stream().map(this::convertToImage).collect(Collectors.toSet()) : Collections.emptySet());
+                post.getPostimages().stream()
+                        .map(this::convertToImage)
+                        .collect(Collectors.toList())
+                : null);
 
         // Convert Shares
         postDto.setShares(post.getShares() != null ?
