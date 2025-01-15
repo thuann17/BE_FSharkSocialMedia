@@ -1,5 +1,7 @@
 package com.system.fsharksocialmedia.services.user;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
 import com.system.fsharksocialmedia.models.CommentModel;
@@ -11,7 +13,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -279,7 +280,7 @@ public class UserPostService {
 
     // Like a post
     @Transactional
-    public LikepostDto likePost(String username, Integer postId) {
+    public LikepostDto likePost(String username, Integer postId)  {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Bài đăng không tồn tại!"));
 
@@ -293,7 +294,17 @@ public class UserPostService {
         Likepost likePost = new Likepost();
         likePost.setUsername(user);
         likePost.setPost(post);
-        simpMessagingTemplate.convertAndSend("/topic/post/" + postId, "User " + username + " liked your post.");
+        String notificationMessage;
+        try {
+            notificationMessage = new ObjectMapper().writeValueAsString(
+                    new LikeNotification(username, "liked your post")
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error creating JSON notification message", e);
+        }
+        System.out.println("Notification message: " + notificationMessage);
+        simpMessagingTemplate.convertAndSend("/topic/post/" + postId, notificationMessage);
+
         Likepost savedLikePost = likepostRepository.save(likePost);
         return convertToLikepostDto(savedLikePost);
     }

@@ -30,4 +30,5 @@ public class TripController {
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(tripService.createTrip(username, placeTripModel.getPlaceId(), placeTripModel));
     }
+
 }
