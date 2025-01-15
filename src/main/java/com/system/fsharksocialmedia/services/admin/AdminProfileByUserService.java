@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -72,18 +73,16 @@ public class AdminProfileByUserService {
         }
     }
 
-    public UserDto updateImage(String username, UserModel model) {
+    public ImageDto updateImage(String username, String avatarUrl) {
         User user = userRepository.findById(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
-        if (model.getAvatarUrl() != null) {
-            Image newImage = new Image();
-            newImage.setAvatarrurl(model.getAvatarUrl());
-            newImage.setUsername(user);
-            newImage.setStatus(true);
-            imageRepository.save(newImage);
-        }
-        userRepository.save(user);
-        return convertToDto(user);
+        Image image = new Image();
+        image.setAvatarrurl(avatarUrl);
+        image.setStatus(true);
+        image.setUsername(user);
+        image.setCreatedate(Instant.now());
+        imageRepository.save(image);
+        return convertToImageDto(image);
     }
 
 

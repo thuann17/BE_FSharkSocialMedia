@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -21,6 +22,8 @@ public class FriendController {
     private FriendService friendService;
     @Autowired
     private UserService userService;
+
+    private List<FriendDto> friendships;
 
     @GetMapping("/{username}")
     public ResponseEntity<List<FriendDto>> getFriendsByUserTarget(@PathVariable String username) {
@@ -55,6 +58,7 @@ public class FriendController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
     //them bạn bè
     @PostMapping("/add-friend/{user1}/{user2}")
     public ResponseEntity<String> addFriend(@PathVariable String user1, @PathVariable String user2) {
@@ -87,5 +91,19 @@ public class FriendController {
 
         // Return the list as the response
         return ResponseEntity.ok(usersWithoutFriends);
+    }
+
+
+    @GetMapping("/check-friendship/{username1}/{username2}")
+    public Boolean checkFriendship(@PathVariable String username1, @PathVariable String username2) {
+        // Lấy thông tin user1 và user2 từ yêu cầu (có thể từ cơ sở dữ liệu hoặc thông qua service)
+        UserDto user1 = new UserDto(); // Tạo UserDto cho user1 từ username1
+        user1.setUsername(username1);
+
+        UserDto user2 = new UserDto(); // Tạo UserDto cho user2 từ username2
+        user2.setUsername(username2);
+
+        // Gọi service để kiểm tra nếu user1 và user2 là bạn bè
+        return friendService.areFriends(user1, user2);
     }
 }
