@@ -37,9 +37,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Integer countPostsByYearAndMonth(@Param("year") Integer year, @Param("month") Integer month);
 
     @Query(value = "EXEC GetUserPostCount :year, :month", nativeQuery = true)
-    List<Map<String, Object>> getUserPostCount(int year, int month);
+    List<Map<String, Object>> getUserPostCount(Integer year, Integer month);
 
     @Query(value = "EXEC GetUserPostCountTop5 :year, :month", nativeQuery = true)
-    List<Map<String, Object>> GetUserPostCountTop5(int year, int month);
+    List<Map<String, Object>> GetUserPostCountTop5(Integer year, Integer month);
 
 }

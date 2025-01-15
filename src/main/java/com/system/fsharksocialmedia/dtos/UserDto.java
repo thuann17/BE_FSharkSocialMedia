@@ -48,7 +48,7 @@ public class UserDto implements Serializable {
     private Set<MessageDto> messages;
     private Set<Likepost> likeposts;
     private Set<Likecmt> likecmts;
-    private Set<UsertripDto> usertrips;
+
 
 
 }

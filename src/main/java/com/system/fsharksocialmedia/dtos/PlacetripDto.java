@@ -1,6 +1,5 @@
 package com.system.fsharksocialmedia.dtos;
 
-import com.system.fsharksocialmedia.entities.Trip;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Value;
@@ -12,7 +11,7 @@ import java.time.Instant;
 public class PlacetripDto implements Serializable {
     Integer id;
     PlaceDto placeid;
-    Trip tripid;
+    TripDto tripid;
     Instant datetime;
     @Size(max = 500)
     String note;

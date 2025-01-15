@@ -1,20 +1,14 @@
 package com.system.fsharksocialmedia.controllers.user;
 
 import com.system.fsharksocialmedia.dtos.PlacetripDto;
-import com.system.fsharksocialmedia.dtos.TripDetailsDto;
 import com.system.fsharksocialmedia.dtos.TripDto;
-import com.system.fsharksocialmedia.entities.Placetrip;
-import com.system.fsharksocialmedia.entities.Trip;
 import com.system.fsharksocialmedia.models.PlaceTripModel;
-import com.system.fsharksocialmedia.models.TripModel;
 import com.system.fsharksocialmedia.services.user.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.List;
 
 @RestController
