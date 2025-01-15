@@ -6,6 +6,7 @@ import lombok.Value;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,7 +20,7 @@ public class PostDto implements Serializable {
     Set<CommentDto> comments;
     Set<LikepostDto> likeposts;
     Set<NotificationDto> notifications;
-    Set<PostimageDto> postimages;
+    List<PostimageDto> postimages;
     Set<ShareDto> shares;
     Long countLike;
     Long countComment;

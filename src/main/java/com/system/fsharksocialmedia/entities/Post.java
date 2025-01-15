@@ -9,6 +9,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -47,7 +48,7 @@ public class Post {
     private Set<Notification> notifications = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "postid")
-    private Set<Postimage> postimages = new LinkedHashSet<>();
+    private List<Postimage> postimages;
 
     @OneToMany(mappedBy = "post")
     private Set<Share> shares = new LinkedHashSet<>();

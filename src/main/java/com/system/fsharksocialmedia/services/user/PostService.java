@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -110,58 +107,68 @@ public class PostService {
         // Fetch the results from the repository using the stored procedure
         List<Object[]> results = postRepository.getPostsWithUserDetails(username);
 
-        // Map the results to PostDto
-        return results.stream().map(result -> {
-            PostDto postDto = new PostDto();
-            UserDto userDto = new UserDto();
-            Set<PostimageDto> postImageDtos = new HashSet<>();
+        // Create a map to group posts by postId
+        Map<Integer, PostDto> postMap = new HashMap<>();
 
-            // Set up PostDto
-            postDto.setId((Integer) result[0]);  // Post ID
-            postDto.setContent((String) result[5]);  // Post content
-            postDto.setCreatedate(((Timestamp) result[6]).toInstant());  // Convert Timestamp to Instant
-            postDto.setStatus((Boolean) result[7]);  // Post status
-            postDto.setCountComment(((Number) result[8]).longValue());  // Count of comments (convert to Long)
-            postDto.setCountLike(((Number) result[9]).longValue());  // Count of likes (convert to Long)
+        // Map the results to PostDto and group by postId
+        results.forEach(result -> {
+            Integer postId = (Integer) result[0];  // Post ID
+            PostDto postDto = postMap.getOrDefault(postId, new PostDto());
 
-            // Set up UserDto
-            userDto.setUsername((String) result[1]);  // Username
-            userDto.setEmail((String) result[2]);  // Email
-            userDto.setFirstname((String) result[3]);  // Firstname
-            userDto.setLastname((String) result[4]);  // Lastname
+            // Set up PostDto (if not already set)
+            if (postDto.getId() == null) {
+                postDto.setId(postId);  // Set Post ID
+                postDto.setContent((String) result[5]);  // Post content
+                postDto.setCreatedate(((Timestamp) result[6]).toInstant());  // Convert Timestamp to Instant
+                postDto.setStatus((Boolean) result[7]);  // Post status
+                postDto.setCountComment(((Number) result[8]).longValue());  // Count of comments (convert to Long)
+                postDto.setCountLike(((Number) result[9]).longValue());  // Count of likes (convert to Long)
 
-            // Handle avatar URLs (result[10])
-            String avatarUrlsString = (String) result[11];
-            if (avatarUrlsString != null && !avatarUrlsString.isEmpty()) {
-                // Parse the avatar URLs if they are comma-separated or in JSON format
-                List<ImageDto> avatarUrls = parseAvatarUrls(avatarUrlsString);
-                userDto.setImages(avatarUrls);  // Set the parsed avatar URLs
+                // Set up UserDto
+                UserDto userDto = new UserDto();
+                userDto.setUsername((String) result[1]);  // Username
+                userDto.setEmail((String) result[2]);  // Email
+                userDto.setFirstname((String) result[3]);  // Firstname
+                userDto.setLastname((String) result[4]);  // Lastname
+
+                // Handle avatar URLs (result[10])
+                String avatarUrlsString = (String) result[11];
+                if (avatarUrlsString != null && !avatarUrlsString.isEmpty()) {
+                    // Parse the avatar URLs if they are comma-separated or in JSON format
+                    List<ImageDto> avatarUrls = parseAvatarUrls(avatarUrlsString);
+                    userDto.setImages(avatarUrls);  // Set the parsed avatar URLs
+                }
+
+                // Associate UserDto with PostDto
+                postDto.setUsername(userDto);
             }
-
-            // Associate UserDto with PostDto
-            postDto.setUsername(userDto);
 
             // Fetch associated post images using the Post ID
             Post post = new Post();
             post.setId(postDto.getId());  // Set Post ID to fetch images related to this post
             List<Postimage> postImages = postImageRepository.findByPostid(post);  // Fetch post images
 
-            // Convert Postimage entities to PostimageDto
+            // Convert Postimage entities to PostimageDto and add them to the PostDto
+            Set<PostimageDto> postImageDtos = new HashSet<>();
             for (Postimage postImage : postImages) {
                 PostimageDto postImageDto = new PostimageDto();
-                postImageDto.setId(postImage.getId());  // Postimage ID
                 postImageDto.setPostid(convertToDto(postImage.getPostid()));  // Convert Post to PostDto
                 postImageDto.setImage(postImage.getImage());  // Post image URL
 
                 postImageDtos.add(postImageDto);  // Add to the set of images
             }
 
-            // Add images to the PostDto
-            postDto.setPostimages(postImageDtos);
+            // Add the images to the PostDto
+            postDto.setPostimages(new ArrayList<>(postImageDtos));
 
-            return postDto;  // Return the fully populated PostDto
-        }).collect(Collectors.toList());  // Collect into a list of PostDto
+            // Add the PostDto to the map to group by postId
+            postMap.put(postId, postDto);
+        });
+
+        // Return the list of PostDto objects from the map
+        return new ArrayList<>(postMap.values());  // Convert map values to a list
     }
+
 
     @Transactional
     public List<PostDto> getSharesWithUserDetailsAndPost(String username) {
@@ -188,12 +195,11 @@ public class PostService {
             userDto.setFirstname((String) result[3]);  // Firstname
             userDto.setLastname((String) result[4]);  // Lastname
 
-            // Handle avatar URLs (result[10])
             String avatarUrlsString = (String) result[11];
             if (avatarUrlsString != null && !avatarUrlsString.isEmpty()) {
-                // Parse the avatar URLs if they are comma-separated or in JSON format
+
                 List<ImageDto> avatarUrls = parseAvatarUrls(avatarUrlsString);
-                userDto.setImages(avatarUrls);  // Set the parsed avatar URLs
+                userDto.setImages(avatarUrls);
             }
 
             // Associate UserDto with PostDto
@@ -215,7 +221,7 @@ public class PostService {
             }
 
             // Add images to the PostDto
-            postDto.setPostimages(postImageDtos);
+            postDto.setPostimages((List<PostimageDto>) postImageDtos);
 
             return postDto;  // Return the fully populated PostDto
         }).collect(Collectors.toList());  // Collect into a list of PostDto
