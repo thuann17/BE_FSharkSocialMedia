@@ -2,7 +2,6 @@ package com.system.fsharksocialmedia.services.admin;
 
 import com.system.fsharksocialmedia.dtos.CommentDto;
 import com.system.fsharksocialmedia.dtos.PostDto;
-import com.system.fsharksocialmedia.dtos.TripDto;
 import com.system.fsharksocialmedia.dtos.UserDto;
 import com.system.fsharksocialmedia.entities.Post;
 import com.system.fsharksocialmedia.repositories.PostRepository;
@@ -33,11 +32,11 @@ public class DashboardService {
         return postDto;
     }
 
-    public List<Map<String, Object>> getUserPostCount(int year, int month) {
+    public List<Map<String, Object>> getUserPostCount(Integer year, Integer month) {
         return postRepository.getUserPostCount(year, month);
     }
 
-    public List<Map<String, Object>> getUserPostCountTop5(int year, int month) {
+    public List<Map<String, Object>> getUserPostCountTop5(Integer year, Integer month) {
         return postRepository.GetUserPostCountTop5(year, month);
     }
 

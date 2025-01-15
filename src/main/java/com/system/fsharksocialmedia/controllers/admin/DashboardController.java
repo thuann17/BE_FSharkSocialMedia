@@ -24,12 +24,16 @@ public class DashboardController {
     }
 
     @GetMapping("/top")
-    public List<Map<String, Object>> getPostCount(@RequestParam int year, @RequestParam int month) {
+    public List<Map<String, Object>> getPostCount(
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month) {
         return dashboardService.getUserPostCount(year, month);
     }
 
     @GetMapping("/popular")
-    public List<Map<String, Object>> getPostCountTop5(@RequestParam int year, @RequestParam int month) {
+    public List<Map<String, Object>> getPostCountTop5(
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month) {
         return dashboardService.getUserPostCountTop5(year, month);
     }
 }

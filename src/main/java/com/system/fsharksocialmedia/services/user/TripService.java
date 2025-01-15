@@ -37,7 +37,6 @@ public class TripService {
             if (place == null || user == null || triprole == null) {
                 throw new IllegalArgumentException("Invalid place, user, or role.");
             }
-
             Trip newTrip = new Trip();
             newTrip.setTripname(placeTripModel.getTripName());
             newTrip.setStartdate(placeTripModel.getStartDate());
@@ -58,7 +57,6 @@ public class TripService {
             tripPlace.setNote(placeTripModel.getNote());
             tripPlace.setPlaceid(place);
             tripPlace.setTripid(savedTrip);
-
             Placetrip savedTripPlace = tripPlaceRepository.save(tripPlace);
 
             return convertToPlaceTripDto(savedTripPlace);
@@ -68,14 +66,6 @@ public class TripService {
         }
     }
 
-    public PlacetripDto convertToPlaceTripDto(Placetrip tripPlace) {
-        PlacetripDto tripPlaceDto = new PlacetripDto();
-        tripPlaceDto.setId(tripPlace.getId());
-        tripPlaceDto.setTripid(tripPlace.getTripid());
-        tripPlaceDto.setDatetime(tripPlace.getDatetime());
-        tripPlaceDto.setNote(tripPlace.getNote());
-        return tripPlaceDto;
-    }
 
     public List<TripDto> getTripsByUsername(String username) {
         User user = userRepository.findById(username).orElse(null);
@@ -97,17 +87,9 @@ public class TripService {
         return imageDto;
     }
 
-    public PlaceimageDto convertToPlaceImageDto(Placeimage image) {
-        PlaceimageDto placeimageDto = new PlaceimageDto();
-        placeimageDto.setId(image.getId());
-        placeimageDto.setImage(image.getImage());
-        return placeimageDto;
-    }
-
     public UserDto convertToUserDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setUsername(user.getUsername());
-        userDto.setPassword(user.getPassword());
         userDto.setEmail(user.getEmail());
         userDto.setLastname(user.getLastname());
         userDto.setFirstname(user.getFirstname());
@@ -117,14 +99,12 @@ public class TripService {
         userDto.setCurrency(user.getCurrency());
         userDto.setGender(user.getGender());
         userDto.setBirthday(user.getBirthday());
-
         if (user.getRoles() != null) {
             UserroleDto userroleDto = new UserroleDto();
             userroleDto.setId(user.getRoles().getId());
             userroleDto.setRole(user.getRoles().getRole());
             userDto.setRoles(userroleDto);
         }
-
         if (user.getImages() != null && !user.getImages().isEmpty()) {
             List<ImageDto> imageDtos = user.getImages().stream()
                     .map(this::convertToImageDto)
@@ -134,59 +114,69 @@ public class TripService {
         return userDto;
     }
 
-    // Convert Usertrip entity to UsertripDto
-    public UsertripDto convertToUsertripDto(Usertrip usertrip) {
-        UsertripDto usertripDto = new UsertripDto();
-        usertripDto.setId(usertrip.getId());
-        usertripDto.setTripid(usertrip.getTripid() != null ? convertToTripDto(usertrip.getTripid()) : null);
-        usertripDto.setUserid(usertrip.getUserid() != null ? convertToUserDto(usertrip.getUserid()) : null);
-        return usertripDto;
-    }
-
     public TripDto convertToTripDto(Trip trip) {
         TripDto tripDto = new TripDto();
-        tripDto.setId(trip.getId());
         tripDto.setTripname(trip.getTripname());
         tripDto.setStartdate(trip.getStartdate());
         tripDto.setEnddate(trip.getEnddate());
         tripDto.setCreatedate(trip.getCreatedate());
         tripDto.setDescription(trip.getDescription());
-
-        if (trip.getUsertrips() != null && !trip.getUsertrips().isEmpty()) {
-            List<UserDto> userDtos = trip.getUsertrips().stream()
-                    .map(usertrip -> convertToUserDto(usertrip.getUserid()))
-                    .collect(Collectors.toList());
-            tripDto.setUsers(userDtos);
+        Set<UsertripDto> usertripDtos = new HashSet<>();
+        for (Usertrip usertrip : trip.getUsertrips()) {
+            UsertripDto usertripDto = new UsertripDto();
+            usertripDto.setId(usertrip.getId());
+            usertripDto.setUserid(convertToUserDto(usertrip.getUserid()));
+            usertripDtos.add(usertripDto);
         }
-
-        if (trip.getPlacetrips() != null && !trip.getPlacetrips().isEmpty()) {
-            List<PlaceDto> placeDtos = trip.getPlacetrips().stream()
-                    .map(placetrip -> {
-                        PlaceDto placeDto = new PlaceDto();
-                        placeDto.setId(placetrip.getPlaceid().getId());
-                        placeDto.setNameplace(placetrip.getPlaceid().getNameplace());
-                        placeDto.setUrlmap(placetrip.getPlaceid().getUrlmap());
-                        placeDto.setAddress(placetrip.getPlaceid().getAddress());
-                        placeDto.setDescription(placetrip.getPlaceid().getDescription());
-
-                        // Map place images
-                        Set<PlaceimageDto> placeImages = placetrip.getPlaceid().getPlaceimages().stream()
-                                .map(this::convertToPlaceImageDto)
-                                .collect(Collectors.toSet());
-                        placeDto.setPlaceimages(placeImages);
-
-                        return placeDto;
-                    })
-                    .collect(Collectors.toList());
-            tripDto.setPlaces(placeDtos);
+        tripDto.setUsertrips(usertripDtos);
+        Set<PlacetripDto> placetripDtos = new HashSet<>();
+        for (Placetrip placetrip : trip.getPlacetrips()) {
+            PlacetripDto placetripDto = new PlacetripDto();
+            placetripDto.setId(placetrip.getId());
+            placetripDto.setPlaceid(convertToPlaceDto(placetrip.getPlaceid()));
+            TripDto associatedTripDto = new TripDto();
+            associatedTripDto.setTripname(placetrip.getTripid().getTripname());
+            associatedTripDto.setStartdate(placetrip.getTripid().getStartdate());
+            associatedTripDto.setEnddate(placetrip.getTripid().getEnddate());
+            placetripDto.setTripid(associatedTripDto);
+            placetripDto.setDatetime(placetrip.getDatetime());
+            placetripDto.setNote(placetrip.getNote());
+            placetripDtos.add(placetripDto);
         }
-        if (trip.getPlacetrips() != null && !trip.getPlacetrips().isEmpty()) {
-            List<PlacetripDto> placetripDtos = trip.getPlacetrips().stream()
-                    .map(this::convertToPlaceTripDto)
-                    .collect(Collectors.toList());
-            tripDto.setPlaceTrips(placetripDtos);
-        }
+        tripDto.setPlacetrips(placetripDtos);
 
         return tripDto;
     }
+
+    public PlacetripDto convertToPlaceTripDto(Placetrip tripPlace) {
+        PlacetripDto tripPlaceDto = new PlacetripDto();
+        tripPlaceDto.setId(tripPlace.getId());
+        tripPlaceDto.setDatetime(tripPlace.getDatetime());
+        tripPlaceDto.setNote(tripPlace.getNote());
+        return tripPlaceDto;
+    }
+
+    public PlaceimageDto convertToPlaceImageDto(Placeimage image) {
+        PlaceimageDto placeimageDto = new PlaceimageDto();
+        placeimageDto.setId(image.getId());
+        placeimageDto.setImage(image.getImage());
+
+        return placeimageDto;
+    }
+    public PlaceDto convertToPlaceDto(Place place) {
+        PlaceDto placeDto = new PlaceDto();
+        placeDto.setId(place.getId());
+        placeDto.setNameplace(place.getNameplace());
+        placeDto.setUrlmap(place.getUrlmap());
+        placeDto.setAddress(place.getAddress());
+        placeDto.setDescription(place.getDescription());
+        Set<PlaceimageDto> placeImages = new HashSet<>();
+        for (Placeimage placeImage : place.getPlaceimages()) {
+            placeImages.add(convertToPlaceImageDto(placeImage));
+        }
+        placeDto.setPlaceimages(placeImages);
+
+        return placeDto;
+    }
+
 }
