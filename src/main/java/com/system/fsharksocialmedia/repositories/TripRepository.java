@@ -37,5 +37,7 @@ public interface TripRepository extends JpaRepository<Trip, Integer> {
     );
 
     List<Trip> findTripsByStartdateAfterAndEnddateBefore(Instant startDate, Instant endDate);
+    List<Trip> findByUsertrips_Userid(User usertrips_userid);
+
 
 }

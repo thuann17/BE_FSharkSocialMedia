@@ -154,7 +154,6 @@ public class TripService {
         return tripDtos;
     }
 
-
     public ImageDto convertToImageDto(Image image) {
         ImageDto imageDto = new ImageDto();
         imageDto.setId(image.getId());
