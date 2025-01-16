@@ -135,24 +135,6 @@ public class TripService {
         }
     }
 
-    @Transactional
-    public List<TripDto> getTripStartDates() {
-        List<Object[]> results = tripRepository.getTripStartDates();
-        List<TripDto> tripDtos = new ArrayList<>();
-
-        for (Object[] result : results) {
-            TripDto tripDto = new TripDto();
-            tripDto.setTripid((Integer) result[0]);
-            tripDto.setTripname((String) result[1]);
-
-            // Convert Timestamp to Instant
-            tripDto.setStartdate(((Timestamp) result[2]).toInstant());
-//            tripDto.setEnddate(((Timestamp) result[3]).toInstant());
-            tripDtos.add(tripDto);
-        }
-
-        return tripDtos;
-    }
 
     public ImageDto convertToImageDto(Image image) {
         ImageDto imageDto = new ImageDto();
