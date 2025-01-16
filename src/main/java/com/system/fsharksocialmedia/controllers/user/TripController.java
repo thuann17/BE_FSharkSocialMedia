@@ -51,8 +51,4 @@ public class TripController {
         tripService.deleteTrip(tripId);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
 }
