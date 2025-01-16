@@ -9,6 +9,7 @@ import org.springframework.boot.Banner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,8 +30,14 @@ public class TripController {
             @PathVariable String username,
             @RequestBody PlaceTripModel placeTripModel
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(tripService.createTrip(username, placeTripModel.getPlaceId(), placeTripModel));
+        try {
+            PlacetripDto placetripDto = tripService.createTrip(username, placeTripModel.getPlaceId(), placeTripModel);
+            return ResponseEntity.status(HttpStatus.CREATED).body(placetripDto);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
+
 
     @PutMapping("/{tripId}")
     public ResponseEntity<TripDto> updateTrip(
@@ -45,8 +52,8 @@ public class TripController {
         return ResponseEntity.noContent().build();
     }
 
-        @GetMapping("/start-dates")
-        public List<TripDto> getTripStartDates() {
-            return tripService.getTripStartDates();
-        }
+    @GetMapping("/start-dates")
+    public List<TripDto> getTripStartDates() {
+        return tripService.getTripStartDates();
+    }
 }
