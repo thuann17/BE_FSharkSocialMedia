@@ -89,8 +89,16 @@ public class TripService {
     public TripDto updateTrip(Integer tripId, PlaceTripModel placeTripModel) {
         try {
             Trip trip = tripRepository.findById(tripId).orElse(null);
-            trip.setStartdate(placeTripModel.getStartDate());
-            trip.setEnddate(placeTripModel.getEndDate());
+            if(placeTripModel.getStartDate() == null){
+
+            }
+            if (placeTripModel.getStartDate() != null) {
+                trip.setStartdate(placeTripModel.getStartDate());
+            }
+
+            if (placeTripModel.getEndDate() != null) {
+                trip.setEnddate(placeTripModel.getEndDate());
+            }
             trip.setDescription(placeTripModel.getDescription());
             Trip savedTrip = tripRepository.save(trip);
             return convertToTripDto(savedTrip);
