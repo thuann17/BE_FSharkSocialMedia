@@ -26,4 +26,8 @@ public interface TripRepository extends JpaRepository<Trip, Integer> {
 
     @Query(value = "EXEC GetTripStartDates", nativeQuery = true)
     List<Object[]> getTripStartDates();
+
+    List<Trip> findByUsertrips_Userid(User usertrips_userid);
+
+
 }

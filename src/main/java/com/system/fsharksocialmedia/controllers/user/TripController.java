@@ -45,8 +45,7 @@ public class TripController {
         return ResponseEntity.noContent().build();
     }
 
-        @GetMapping("/start-dates")
-        public List<TripDto> getTripStartDates() {
-            return tripService.getTripStartDates();
-        }
+
+
+
 }
