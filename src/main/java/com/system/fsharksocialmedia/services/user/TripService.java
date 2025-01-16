@@ -2,16 +2,22 @@ package com.system.fsharksocialmedia.services.user;
 
 import com.system.fsharksocialmedia.dtos.*;
 import com.system.fsharksocialmedia.entities.*;
+import com.system.fsharksocialmedia.exceptions.TripOverlapException;
 import com.system.fsharksocialmedia.models.PlaceTripModel;
 import com.system.fsharksocialmedia.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,9 +49,18 @@ public class TripService {
             Triprole triprole = triproleRepository.findById(1).orElse(null);
 
             if (place == null || user == null || triprole == null) {
-                throw new IllegalArgumentException("Invalid place, user, or role.");
+                throw new IllegalArgumentException("Địa điểm, người dùng hoặc vai trò không hợp lệ.");
             }
             Trip newTrip = new Trip();
+            List<Trip> existingTrips = tripRepository.findTripsByDateRange(
+                    placeTripModel.getStartDate(),
+                    placeTripModel.getEndDate()
+            );
+            if (!existingTrips.isEmpty()) {
+                String errorMessage = "Đã có một chuyến đi trong khoảng thời gian này.";
+                System.err.println(errorMessage);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
+            }
             newTrip.setTripname(placeTripModel.getTripName());
             newTrip.setStartdate(placeTripModel.getStartDate());
             newTrip.setEnddate(placeTripModel.getEndDate());
@@ -56,7 +71,6 @@ public class TripService {
             Usertrip userTrip = new Usertrip();
             userTrip.setRole(triprole);
             userTrip.setUserid(user);
-            userTrip.setId(userTrip.getId());
             userTrip.setTripid(savedTrip);
             usertripRepository.save(userTrip);
 
@@ -68,13 +82,14 @@ public class TripService {
             Placetrip savedTripPlace = tripPlaceRepository.save(tripPlace);
             return convertToPlaceTripDto(savedTripPlace);
         } catch (RuntimeException e) {
-            throw new RuntimeException();
+            throw new RuntimeException("Lỗi khi tạo chuyến đi", e);
         }
     }
 
     public TripDto updateTrip(Integer tripId, PlaceTripModel placeTripModel) {
         try {
             Trip trip = tripRepository.findById(tripId).orElse(null);
+            trip.setStartdate(placeTripModel.getStartDate());
             trip.setEnddate(placeTripModel.getEndDate());
             trip.setDescription(placeTripModel.getDescription());
             Trip savedTrip = tripRepository.save(trip);
@@ -124,7 +139,7 @@ public class TripService {
 
             // Convert Timestamp to Instant
             tripDto.setStartdate(((Timestamp) result[2]).toInstant());
-
+//            tripDto.setEnddate(((Timestamp) result[3]).toInstant());
             tripDtos.add(tripDto);
         }
 
