@@ -38,9 +38,13 @@ public class LoginController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> addNewUser(@RequestBody UserModel model) {
-        UserDto createdUser = userInfoService.addUser(model);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    public ResponseEntity<?> addNewUser(@RequestBody UserModel model) {
+        try {
+            UserDto createdUser = userInfoService.addUser(model);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PostMapping("/register-admin")

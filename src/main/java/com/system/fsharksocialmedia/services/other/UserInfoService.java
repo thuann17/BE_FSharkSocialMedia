@@ -65,32 +65,40 @@ public class UserInfoService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 
-
     public UserDto addUser(UserModel model) {
-      Optional<User> existingUser = userRepository.findById(model.getUsername());
+        Optional<User> existingUser = userRepository.findById(model.getUsername());
+        User user = userRepository.findByEmail(model.getEmail());
+
         if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("User data or Username is missing");
+            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại trong hệ thống.");
+        }
+
+        if (user.getImages().equals(model.getUsername())) {
+            throw new IllegalArgumentException("Tên đăng nhập đã được sử dụng");
         }
         if (model.getUsername() == null || model.getUsername().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be empty");
+            throw new IllegalArgumentException("Tên người dùng không thể để trống");
         }
         if (model.getPassword() == null || model.getPassword().length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters long");
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
         }
         if (model.getEmail() == null || model.getEmail().isEmpty() || !model.getEmail().contains("@")) {
-            throw new IllegalArgumentException("Invalid email address");
+            throw new IllegalArgumentException("Địa chỉ email không hợp lệ");
+        }
+        if (user.getEmail() != null) {
+            throw new IllegalArgumentException("Email đã được sử dụng trong hệ thống.");
         }
         if (model.getLastname() == null || model.getLastname().isEmpty()) {
-            throw new IllegalArgumentException("Lastname cannot be empty");
+            throw new IllegalArgumentException("Họ không thể để trống");
         }
         if (model.getFirstname() == null || model.getFirstname().isEmpty()) {
-            throw new IllegalArgumentException("Firstname cannot be empty");
+            throw new IllegalArgumentException("Tên không thể để trống");
         }
         if (model.getBirthday() == null) {
-            throw new IllegalArgumentException("Birthday cannot be null");
+            throw new IllegalArgumentException("Ngày sinh không thể để trống");
         }
         if (model.getGender() == null) {
-            throw new IllegalArgumentException("Gender cannot be null");
+            throw new IllegalArgumentException("Giới tính không thể để trống");
         }
         User us = new User();
         us.setUsername(model.getUsername());
@@ -105,67 +113,6 @@ public class UserInfoService implements UserDetailsService {
         us.setHometown("Chưa cập nhật");
         us.setCurrency("Chưa cập nhật");
         Userrole role = userroleRepository.findById(2)
-                .orElseThrow(() -> new IllegalArgumentException("Role not found: " + model.getRoleId()));
-        us.setRoles(role);
-        String avatarUrl = model.getAvatarUrl() != null ? model.getAvatarUrl() :
-                    "https://firebasestorage.googleapis.com/v0/b/socialmedia-8bff2.appspot.com/o/ThuanImage%2Favt.jpg?alt=media";
-        Image image = new Image();
-        image.setAvatarrurl(avatarUrl);
-        image.setUsername(us);
-        image.setStatus(true);
-        image.setCreatedate(Instant.now());
-        Set<Image> imageSet = new HashSet<>();
-        imageSet.add(image);
-        us.setImages(imageSet);
-        try {
-            User savedUser = repository.save(us);
-            imageRepository.save(image);
-            return convertToUserDto(savedUser);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not commit JPA transaction", e);
-        }
-
-    }
-    public UserDto addAdmin(UserModel model) {
-        Optional<User> existingUser = userRepository.findById(model.getUsername());
-        if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("User data or Username is missing");
-        }
-        if (model.getUsername() == null || model.getUsername().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be empty");
-        }
-        if (model.getPassword() == null || model.getPassword().length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters long");
-        }
-        if (model.getEmail() == null || model.getEmail().isEmpty() || !model.getEmail().contains("@")) {
-            throw new IllegalArgumentException("Invalid email address");
-        }
-        if (model.getLastname() == null || model.getLastname().isEmpty()) {
-            throw new IllegalArgumentException("Lastname cannot be empty");
-        }
-        if (model.getFirstname() == null || model.getFirstname().isEmpty()) {
-            throw new IllegalArgumentException("Firstname cannot be empty");
-        }
-        if (model.getBirthday() == null) {
-            throw new IllegalArgumentException("Birthday cannot be null");
-        }
-        if (model.getGender() == null) {
-            throw new IllegalArgumentException("Gender cannot be null");
-        }
-        User us = new User();
-        us.setUsername(model.getUsername());
-        us.setPassword(encoder.encode(model.getPassword()));
-        us.setEmail(model.getEmail());
-        us.setActive(true);
-        us.setGender(true);
-        us.setLastname(model.getLastname());
-        us.setFirstname(model.getFirstname());
-        us.setBirthday(model.getBirthday());
-        us.setBio("Xin chào");
-        us.setHometown("Chưa cập nhật");
-        us.setCurrency("Chưa cập nhật");
-        Userrole role = userroleRepository.findById(1)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + model.getRoleId()));
         us.setRoles(role);
         String avatarUrl = model.getAvatarUrl() != null ? model.getAvatarUrl() :
@@ -187,6 +134,67 @@ public class UserInfoService implements UserDetailsService {
             throw new RuntimeException("Could not commit JPA transaction", e);
         }
 
+    }
+
+    public UserDto addAdmin(UserModel model) {
+        Optional<User> existingUser = userRepository.findById(model.getUsername());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Dữ liệu người dùng hoặc Tên người dùng bị thiếu");
+        }
+        if (model.getUsername() == null || model.getUsername().isEmpty()) {
+            throw new IllegalArgumentException("Tên người dùng không thể để trống");
+        }
+        if (model.getPassword() == null || model.getPassword().length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+        }
+        if (model.getEmail() == null || model.getEmail().isEmpty() || !model.getEmail().contains("@")) {
+            throw new IllegalArgumentException("Địa chỉ email không hợp lệ");
+        }
+        if (model.getLastname() == null || model.getLastname().isEmpty()) {
+            throw new IllegalArgumentException("Họ không thể để trống");
+        }
+        if (model.getFirstname() == null || model.getFirstname().isEmpty()) {
+            throw new IllegalArgumentException("Tên không thể để trống");
+        }
+        if (model.getBirthday() == null) {
+            throw new IllegalArgumentException("Ngày sinh không thể để trống");
+        }
+        if (model.getGender() == null) {
+            throw new IllegalArgumentException("Giới tính không thể để trống");
+        }
+        User us = new User();
+        us.setUsername(model.getUsername());
+        us.setPassword(encoder.encode(model.getPassword()));
+        us.setEmail(model.getEmail());
+        us.setActive(true);
+        us.setGender(true);
+        us.setLastname(model.getLastname());
+        us.setFirstname(model.getFirstname());
+        us.setBirthday(model.getBirthday());
+        us.setBio("Xin chào");
+        us.setHometown("Chưa cập nhật");
+        us.setCurrency("Chưa cập nhật");
+        Userrole role = userroleRepository.findById(1)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy vai trò: " + model.getRoleId()));
+        us.setRoles(role);
+        String avatarUrl = model.getAvatarUrl() != null ? model.getAvatarUrl() :
+                "https://firebasestorage.googleapis.com/v0/b/socialmedia-8bff2.appspot.com/o/ThuanImage%2Favt.jpg?alt=media";
+        Image image = new Image();
+        image.setAvatarrurl(avatarUrl);
+        image.setUsername(us);
+        image.setStatus(true);
+        image.setCreatedate(Instant.now());
+        Set<Image> imageSet = new HashSet<>();
+        imageSet.add(image);
+        us.setImages(imageSet);
+        try {
+            User savedUser = repository.save(us);
+            imageRepository.save(image);
+            return convertToUserDto(savedUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Không thể hoàn tất giao dịch JPA", e);
+        }
     }
 
     public UserDto convertToUserDto(User user) {

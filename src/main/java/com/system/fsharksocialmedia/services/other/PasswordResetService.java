@@ -51,14 +51,15 @@ public class PasswordResetService {
         userRepository.save(user);
     }
 
+
     public void resetPassword(String token, String newPassword) {
         String email = getEmailByToken(token);
         if (email == null || isTokenExpired(email)) {
             throw new IllegalArgumentException("Token không hợp lệ hoặc đã hết hạn");
         }
         User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new IllegalArgumentException("Email không tồn tại");
+        if (user.getEmail() == null) {
+            throw new IllegalArgumentException("Email không tồn tại trong hệ thống.");
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);

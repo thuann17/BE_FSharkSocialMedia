@@ -22,14 +22,12 @@ public class PasswordResetController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email không được để trống.");
         }
         try {
-            passwordResetService.forgotPassword(email);
+            passwordResetService.forgotPassword(email); // Gửi email thành công
             return ResponseEntity.ok("Yêu cầu đặt lại mật khẩu đã được gửi.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email không tồn tại trong hệ thống.");
         } catch (Exception e) {
-            System.out.println("Lỗi khi xử lý yêu cầu quên mật khẩu: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Có lỗi xảy ra khi gửi yêu cầu đặt lại mật khẩu.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Có lỗi xảy ra. Vui lòng thử lại.");
         }
     }
 
