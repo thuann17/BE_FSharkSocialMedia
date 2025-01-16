@@ -27,8 +27,6 @@ public interface TripRepository extends JpaRepository<Trip, Integer> {
             "WHERE u.username = :username")
     List<Trip> findTripsByUsernameAndPlaceId(String username);
 
-    @Query(value = "EXEC GetTripStartDates", nativeQuery = true)
-    List<Object[]> getTripStartDates();
 
     @Query("SELECT t FROM Trip t WHERE t.startdate >= :startDate AND t.enddate <= :endDate ")
     List<Trip> findTripsByDateRange(
