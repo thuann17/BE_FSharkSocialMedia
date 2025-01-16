@@ -36,8 +36,6 @@ public interface TripRepository extends JpaRepository<Trip, Integer> {
             @Param("endDate") Instant endDate
     );
 
-    List<Trip> findTripsByStartdateAfterAndEnddateBefore(Instant startDate, Instant endDate);
-    List<Trip> findByUsertrips_Userid(User usertrips_userid);
 
 
 }
